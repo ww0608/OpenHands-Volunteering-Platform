@@ -1,0 +1,424 @@
+﻿/* Retrospective Page Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f5f7fb;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+.main-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    color: #8e94a7;
+    font-size: 0.95rem;
+}
+
+.breadcrumb a {
+    color: #4e5697;
+    text-decoration: none;
+}
+
+/*.breadcrumb a:hover {
+    text-decoration: underline;
+}
+*/
+.breadcrumb i {
+    font-size: 0.8rem;
+    color: #8e94a7;
+}
+
+/* Header Section */
+.header-section {
+    background: linear-gradient(135deg, #3f4079 0%, #5f61a9 100%);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(63, 64, 121, 0.2);
+}
+
+.header-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+}
+
+.header-info {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+    .info-item i {
+        font-size: 1.2rem;
+    }
+
+/* Export Buttons */
+.export-section {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.btn-export {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-export-pdf {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-export-excel {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-export:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    color: white;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #edf2f9;
+}
+
+.stat-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #3f4079;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: #8e94a7;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.stat-trend {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.trend-up {
+    color: #10b981;
+}
+
+.trend-down {
+    color: #ef4444;
+}
+
+/* Charts Row */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid #edf2f9;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #3f4079;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .chart-title i {
+        color: #8b92d1;
+    }
+
+.chart-container {
+    height: 250px;
+    position: relative;
+}
+
+/* Performance Section */
+.performance-section {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid #edf2f9;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.performance-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 16px;
+}
+
+.performance-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3f4079;
+    margin-bottom: 0.5rem;
+}
+
+.performance-label {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.performance-badge {
+    font-size: 0.85rem;
+    padding: 0.25rem 1rem;
+    border-radius: 50px;
+    display: inline-block;
+}
+
+.badge-excellent {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-good {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-fair {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-poor {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Table Section */
+.table-section {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid #edf2f9;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.table-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #3f4079;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .table th {
+        text-align: left;
+        padding: 1rem 0.75rem;
+        color: #8e94a7;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e9ecf3;
+    }
+
+    .table td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid #e9ecf3;
+        color: #2d3e4f;
+    }
+
+    .table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table tr:hover td {
+        background-color: #f5f7ff;
+    }
+
+/* Credit Badges */
+.credit-badge {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.credit-high {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.credit-average {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.credit-low {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Attendance Badges */
+.attendance-badge {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-present {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-noshow {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #8e94a7;
+}
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #d8ddff;
+    }
+
+    .empty-state h3 {
+        margin-top: 1rem;
+        color: #3f4079;
+    }
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+
+    .performance-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 0 1rem;
+    }
+
+    .header-title {
+        font-size: 1.8rem;
+    }
+
+    .header-info {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .export-section {
+        flex-direction: column;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

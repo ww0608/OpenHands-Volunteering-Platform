@@ -1,0 +1,116 @@
+﻿
+/* hero image container */
+.hero-image {
+    background-image: url("../images/VOL Page 1\(1\).png");  
+    background-size: cover;
+    background-position: center; 
+    min-height: 85vh; /* ensures visual impact */
+    position: relative;
+}
+
+.hero-overlay-text {
+    background: rgba(0, 0, 0, 0.45); /* subtle overlay to make white text pop */
+    padding: 2rem 3rem;
+    border-radius: 24px 0 0 24px;
+    max-width: 650px;
+    margin-right: 0;
+    margin-left: auto; /* push right */
+}
+
+/* split banners (why join us) */
+.split-banner {
+    background-size: cover;
+    background-position: center;
+    min-height: 260px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-individual {
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("../images/VOL Page 1\(2\).png");
+}
+
+.banner-organization {
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("../images/VOL Page 1\(3\).png");
+}
+
+.banner-inner {
+    width: 100%;
+    text-align: center;
+}
+/* about section carousel images */
+.carousel-img-rounded {
+    border-radius: 28px;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+/* custom carousel controls (circles) */
+.carousel-control-prev-icon-custom,
+.carousel-control-next-icon-custom {
+    background-color: #0d6efd;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    background-size: 60%;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0.9;
+    transition: 0.15s;
+}
+
+.carousel-control-prev-icon-custom:hover,
+.carousel-control-next-icon-custom:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.carousel-control-prev-icon-custom {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e");
+}
+
+.carousel-control-next-icon-custom {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.carousel-control-prev, .carousel-control-next {
+    width: auto;
+    opacity: 1;
+}
+
+.carousel-control-prev {
+    left: -20px;
+}
+
+.carousel-control-next {
+    right: -20px;
+}
+
+@media (max-width: 768px) {
+    .carousel-control-prev {
+        left: -10px;
+    }
+
+    .carousel-control-next {
+        right: -10px;
+    }
+}
+
+/* small utility: underlined hover for specific inline items? we used ::after in nav, but for action buttons inside banners we keep outline-light. that's fine */
+
+/* fix for sticky nav */
+body {
+    padding-top: 0;
+}
+/* tagline right aligned + background readability */
+.display-4 {
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #0d6efd; /* primary */
+}
+
+

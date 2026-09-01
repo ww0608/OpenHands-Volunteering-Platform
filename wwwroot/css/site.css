@@ -1,0 +1,183 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+
+.btn-outline-primary {
+    border-color: #676eb2 !important;
+    color: #676eb2 !important;
+}
+
+.btn-primary, .btn-outline-primary:hover {
+    border-color: #676eb2 !important;
+    background-color: #676eb2 !important;
+}
+
+.btn-primary:hover {
+    filter: brightness(0.85) !important; /* 0.85 = 15% darker */
+    border-color: rgba(0,0,0,0.1) !important; /* Optional: subtle border darken */
+}
+
+.btn-outline-primary:hover {
+    color: white !important; /* Flips text to white */
+}
+
+/*By WW*/
+.dropdown-menu {
+    border-radius: 12px;
+    border: 1px solid #edf2f9;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    /* Fix positioning */
+    right: 0 !important;
+    left: auto !important;
+    min-width: 220px;
+    transform: translate3d(0, 0, 0) !important;
+}
+
+/* Ensure the dropdown container is positioned correctly */
+.dropdown {
+    position: relative;
+}
+
+.nav-item.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle::after {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+.dropdown-item {
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.dropdown-item i {
+    width: 1.2rem;
+    color: #8b92d1;
+    font-size: 1rem;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f7ff;
+}
+
+.dropdown-item:hover i {
+    color: #3f4079;
+}
+
+.dropdown-divider {
+    margin: 0.25rem 0;
+    border-top: 1px solid #e9ecf3;
+}
+
+/* Ensure dropdown stays within viewport on small screens */
+@media (max-width: 768px) {
+    .dropdown-menu {
+        right: 0 !important;
+        left: auto !important;
+        min-width: 200px;
+        transform: translate3d(0, 0, 0) !important;
+        position: absolute !important;
+        z-index: 9999 !important;
+    }
+}
+
+/* By ANGEL */
+/* Fix notification dropdown z-index */
+.navbar {
+    z-index: 1030;
+}
+
+.navbar .dropdown-menu {
+    z-index: 9999 !important;
+}
+
+.navbar-nav .dropdown-menu {
+    position: absolute !important;
+}
+
+* By WW */
+/* Hover effect for nav links */
+.navbar-nav .nav-link:hover {
+    color: #8b92d1 !important;
+}
+
+/* Active page highlighting */
+.navbar-nav .nav-link.active {
+    color: #8b92d1 !important;
+    font-weight: 600 !important;
+}
+
+/* Hover for dropdown items */
+.dropdown-item:hover {
+    background-color: #f5f7ff !important;
+    color: #8b92d1 !important;
+}
+
+/* Active dropdown item */
+.dropdown-item.active {
+    background-color: #f5f7ff !important;
+    color: #8b92d1 !important;
+    font-weight: 600 !important;
+}
+
+/* Active dropdown toggle (the parent button) */
+.dropdown.active-dropdown > .dropdown-toggle {
+    color: #8b92d1 !important;
+    font-weight: 600 !important;
+}
+
+/*ww fix*/
+.page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #3f4079;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.5px;
+}
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #8e94a7;
+    font-size: 0.9rem;
+}
+
+.breadcrumb a {
+    color: #4e5697;
+    text-decoration: none;
+}
+
+.breadcrumb i {
+    font-size: 0.8rem;
+}
