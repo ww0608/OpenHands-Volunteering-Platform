@@ -1,0 +1,133 @@
+﻿@model OpenHandsVolunteerPlatform.ViewModels.OpportunityViewModel
+
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.Opportunity.Title;
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div class="main-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="@Url.Action("Index")">Opportunities</a>
+        <i class="bi bi-chevron-right"></i>
+        <span>@Model.Opportunity.Title</span>
+    </div>
+
+    <!-- Header -->
+    <div class="opportunity-header">
+        <div class="title-section">
+            <div class="title-row">
+                <h1 class="opportunity-title">@Model.Opportunity.Title</h1>
+                <span class="status-badge @Model.StatusClass">
+                    @Model.TimeStatus
+                </span>
+            </div>
+
+            <div class="location">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>@Model.Opportunity.Location</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-buttons">
+
+            @if (Model.ShowManagement)
+            {
+                <a href="@Url.Action("Index", "VolunteerDirectory", new { area = "Organization", opportunityId = Model.Opportunity.OpportunityId })"
+                   class="btn-primary-action" style="text-decoration:none;">
+                    <i class="bi bi-people"></i>
+                    MANAGE VOLUNTEER
+                </a>
+            }
+
+            @if (Model.ShowAttendance)
+            {
+                <a href="@Url.Action("Manage", "Attendance", new { area = "Organization", id = Model.Opportunity.OpportunityId })"
+                   class="btn-primary-action" style=" text-decoration:none;">
+                    <i class="bi bi-calendar-check"></i>
+                    MANAGE ATTENDANCE
+                </a>
+            }
+
+            @if (Model.ShowEdit)
+            {
+                <a href="@Url.Action("Edit", new { id = Model.Opportunity.OpportunityId, status = ViewBag.CurrentStatus })"
+                   class="btn-edit" style="text-decoration:none;">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+            }
+
+            @if (Model.ShowDelete)
+            {
+                <a href="@Url.Action("Delete", new { id = Model.Opportunity.OpportunityId, status = ViewBag.CurrentStatus })"
+                   class="btn-edit" style="text-decoration:none;">
+                    <i class="bi bi-trash3"></i>
+                </a>
+            }
+
+            @if (Model.ShowRetrospective)
+            {
+                <a href="@Url.Action("Retrospective", "Attendance", new { area = "Organization", id = Model.Opportunity.OpportunityId })"
+                   class="btn-edit" style="text-decoration:none;">
+                    <i class="bi bi-graph-up"></i>
+                    VIEW RETROSPECTIVE
+                </a>
+            }
+
+        </div>
+    </div>
+
+    <!-- Meta -->
+    <div class="meta-grid">
+        <div class="meta-card">
+            <div class="meta-icon">
+                <i class="bi bi-calendar3"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">DATE</span>
+                <span class="meta-value">@Model.Opportunity.Date.ToString("dd MMMM yyyy")</span>
+            </div>
+        </div>
+
+        <div class="meta-card">
+            <div class="meta-icon">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">TIME</span>
+                <span class="meta-value">@Model.Opportunity.StartTime.ToString(@"hh\:mm") - @Model.Opportunity.EndTime.ToString(@"hh\:mm")</span>
+            </div>
+        </div>
+
+        <div class="meta-card">
+            <div class="meta-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">VOLUNTEERS</span>
+                <span>@Model.AppliedCount / @Model.Opportunity.VolunteersNeeded</span>
+            </div>
+        </div>
+
+        <div class="meta-card danger">
+            <div class="meta-icon" style="color:indianred; background-color:mistyrose">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">APPLICATION CLOSE DATE</span>
+                <span>@Model.Opportunity.ApplicationCloseDate.ToString("dd MMMM yyyy")</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Description -->
+    <div class="description-card">
+        <h2 class="section-title">Description</h2>
+        <p>@Model.Opportunity.Description</p>
+    </div>
+
+</div>

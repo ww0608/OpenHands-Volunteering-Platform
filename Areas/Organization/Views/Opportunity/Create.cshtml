@@ -1,0 +1,524 @@
+﻿@using System.Text.RegularExpressions
+@model OpenHandsVolunteerPlatform.Models.Opportunity
+
+@* By ANGEL *@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Create";
+}
+
+@* WW FIX THE AI FEATURE *@
+@* AUTO-FILL FROM AI CHATBOT *@
+@{
+    // Get query parameters from AI chatbot
+    var title = Context.Request.Query["title"].ToString();
+    var volunteers = Context.Request.Query["volunteers"].ToString();
+    var date = Context.Request.Query["date"].ToString();
+    var startTime = Context.Request.Query["startTime"].ToString();
+    var endTime = Context.Request.Query["endTime"].ToString();
+    var location = Context.Request.Query["location"].ToString();
+    var description = Context.Request.Query["description"].ToString();
+    var applicationCloseDate = Context.Request.Query["applicationCloseDate"].ToString();
+    var isEmergency = Context.Request.Query["isEmergency"].ToString() == "true";
+    var minimumCreditLevel = Context.Request.Query["minimumCreditLevel"].ToString();
+
+    // Title
+    if (!string.IsNullOrEmpty(title))
+    {
+        Model.Title = System.Web.HttpUtility.UrlDecode(title);
+    }
+
+    // Volunteers
+    if (!string.IsNullOrEmpty(volunteers))
+    {
+        Model.VolunteersNeeded = int.TryParse(volunteers, out var v) ? v : 0;
+    }
+
+    // Date
+    if (!string.IsNullOrEmpty(date))
+    {
+        if (DateTime.TryParse(date, out var d))
+        {
+            Model.Date = d;
+        }
+    }
+
+    // Start Time - LLM outputs 24-hour format like "09:00"
+    if (!string.IsNullOrEmpty(startTime))
+    {
+        string cleanStartTime = startTime.Trim();
+        var parts = cleanStartTime.Split(':');
+        if (parts.Length == 2 && int.TryParse(parts[0], out int hour) && int.TryParse(parts[1], out int minute))
+        {
+            if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59)
+            {
+                Model.StartTime = new TimeSpan(hour, minute, 0);
+            }
+        }
+    }
+
+    // End Time - LLM outputs 24-hour format like "22:00"
+    if (!string.IsNullOrEmpty(endTime))
+    {
+        string cleanEndTime = endTime.Trim();
+        var parts = cleanEndTime.Split(':');
+        if (parts.Length == 2 && int.TryParse(parts[0], out int hour) && int.TryParse(parts[1], out int minute))
+        {
+            if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59)
+            {
+                Model.EndTime = new TimeSpan(hour, minute, 0);
+            }
+        }
+    }
+
+    // Location
+    if (!string.IsNullOrEmpty(location))
+    {
+        Model.Location = System.Web.HttpUtility.UrlDecode(location);
+    }
+
+    // Description
+    if (!string.IsNullOrEmpty(description))
+    {
+        Model.Description = System.Web.HttpUtility.UrlDecode(description);
+    }
+
+    // Application Close Date
+    if (!string.IsNullOrEmpty(applicationCloseDate))
+    {
+        // If user provided a date, use it
+        if (DateTime.TryParse(applicationCloseDate, out var acd))
+        {
+            Model.ApplicationCloseDate = acd;
+        }
+    }
+    else if (Model.Date != default)
+    {
+        // If not provided, auto-set to 1 day before event date
+        Model.ApplicationCloseDate = Model.Date.AddDays(-1);
+    }
+
+    // Emergency Mode
+    if (isEmergency || Context.Request.Query["isEmergency"].ToString() == "true")
+    {
+        Model.IsEmergency = true;
+    }
+
+    // Store credit level in viewbag for dropdown selection
+    ViewBag.MinimumCreditLevel = minimumCreditLevel;
+}
+
+
+
+<div class="container mt-4">
+    <div class="form-container">
+        <!-- Page Header -->
+        <div class="page-header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e9ecf3;">
+            <h1>Create Opportunity</h1>
+            <p>Fill in the details below to create a new volunteer opportunity</p>
+        </div>
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input asp-for="OrganizationId" type="hidden" class="form-control" />
+            <input asp-for="OpportunityId" type="hidden" class="form-control" />
+            <input asp-for="Status" type="hidden" class="form-control" />
+
+            <!-- Basic Information Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-info-circle"></i> Basic Information</h4>
+                <div class="form-group">
+                    <label asp-for="Title">Title</label>
+                    <span class="required-star">*</span>
+                    <input asp-for="Title" class="form-control" placeholder="e.g., Beach Cleanup Day" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description">Description</label>
+					<span class="required-star">*</span>
+                    <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe the volunteer opportunity..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Date & Time Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-calendar-event"></i> Date & Time</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Date">Date</label>
+                            <span class="required-star">*</span>
+                            <input asp-for="Date" type="date" value="@(Model.Date > DateTime.MinValue ? Model.Date.ToString("yyyy-MM-dd") : "")" class="form-control" style="max-width: 60%;"/>
+                            <span asp-validation-for="Date" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ApplicationCloseDate">Application Close Date</label>
+                            <span class="required-star">*</span>
+                            <input asp-for="ApplicationCloseDate" type="date" value="@(Model.ApplicationCloseDate > DateTime.MinValue ? Model.ApplicationCloseDate.ToString("yyyy-MM-dd") : "")"  class="form-control" style="max-width: 60%;" />
+                            <span asp-validation-for="ApplicationCloseDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="StartTime">Start Time</label>
+                            <span class="required-star">*</span>
+                            <input asp-for="StartTime" type="time" value="@(Model.StartTime != default ? Model.StartTime.ToString(@"hh\:mm") : "")" class="form-control" style="max-width: 60%;" />
+                            <span asp-validation-for="StartTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                        <label asp-for="EndTime">End Time</label>
+                        <span class="required-star">*</span>
+                        <input asp-for="EndTime" type="time" value="@(Model.StartTime != default ? Model.EndTime.ToString(@"hh\:mm") : "")" class="form-control" style="max-width: 60%;"  />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-geo-alt"></i> Location</h4>
+                <div class="form-group">
+                    <label asp-for="Location">Address</label>
+                    <span class="required-star">*</span>
+                    <div class="input-group">
+                        <input type="text" id="address" asp-for="Location" class="form-control" placeholder="Enter full address" />
+                        <button type="button" class="btn-search" onclick="updateMap()">Search</button>
+                    </div>
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+                <div class="map-frame">
+                    <!-- Google Map -->
+                    <iframe id="map"
+                            src="https://www.google.com/maps?q=default&output=embed"
+                            width="100%"
+                            height="300"
+                            style="border:0; margin-top:10px;"
+                            allowfullscreen
+                            loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Capacity & Settings Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-people"></i> Capacity & Settings</h4>
+                <div class="form-group">
+                    <label asp-for="VolunteersNeeded">Volunteers Needed</label>
+                    <span class="required-star">*</span>
+                    <input asp-for="VolunteersNeeded" class="form-control" type="number" min="1" style="max-width: 200px;" />
+                    <span asp-validation-for="VolunteersNeeded" class="text-danger"></span>
+                </div>
+
+                @* By WW *@
+                <!-- Emergency Mode Toggle -->
+                <div class="emergency-box">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="IsEmergency" name="IsEmergency" value="true" @(Model.IsEmergency ? "checked" : "")>
+                        <label class="form-check-label fw-bold" for="IsEmergency">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Emergency Mode
+                        </label>
+                    </div>
+                    <small class="text-muted d-block mt-1">Emergency opportunities appear with red URGENT badge and are pinned to top</small>
+                    <input type="hidden" name="IsEmergency" value="false">
+                </div>
+
+                <!-- Credit Level Selection -->
+                <div id="creditLevelDiv" style="display: @(Model.IsEmergency ? "block" : "none");" class="credit-select">
+                    <label class="form-label fw-bold">Minimum Credit Score Required</label>
+                    @* <select name="MinimumCreditLevel" class="form-select" style="max-width: 350px;">
+                            <option value="">Select minimum credit level</option>
+                            <option value="3">⭐ Core Only (High Credit)</option>
+                            <option value="2">📈 Growing and Above (Average Credit)</option>
+                            <option value="1">🌱 All Volunteers (Including Low Credit)</option>
+                        </select> *@
+                    @* ww fix *@
+                    <select name="MinimumCreditLevel" class="form-select" style="max-width: 350px;">
+                        <option value="">Select minimum credit level</option>
+                        @if (ViewBag.MinimumCreditLevel == "3")
+                        {
+                            <option value="3" selected>⭐ Core Only (High Credit)</option>
+                        }
+                        else
+                        {
+                            <option value="3">⭐ Core Only (High Credit)</option>
+                        }
+
+                        @if (ViewBag.MinimumCreditLevel == "2")
+                        {
+                            <option value="2" selected>📈 Growing and Above (Average Credit)</option>
+                        }
+                        else
+                        {
+                            <option value="2">📈 Growing and Above (Average Credit)</option>
+                        }
+
+                        @if (ViewBag.MinimumCreditLevel == "1")
+                        {
+                            <option value="1" selected>🌱 All Volunteers (Including Low Credit)</option>
+                        }
+                        else
+                        {
+                            <option value="1">🌱 All Volunteers (Including Low Credit)</option>
+                        }
+                    </select>
+
+                @* By ANGEL *@
+                <!-- Recurrence Options -->
+                <div class="form-group mt-3">
+                    <label class="control-label fw-semibold">Recurrence</label>
+                    <select name="recurrence" class="form-select" style="max-width: 250px;" onchange="toggleRecurrenceCount(this.value)">
+                        <option value="None">None (Single event)</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                    </select>
+                </div>
+
+                <div id="recurrenceCountDiv" style="display:none;" class="form-group mt-2">
+                    <label class="control-label fw-semibold">Number of additional occurrences</label>
+                    <input type="number" name="recurrenceCount" min="1" max="12" class="form-control" style="max-width: 200px;" value="3" />
+                    <small class="text-muted d-block">Example: 3 = 4 total events including the first</small>
+                </div>
+            </div>
+        </div>
+            <!-- Form Actions with Purple Line ABOVE -->
+            <div class="form-actions">
+                <a asp-action="Index" class="btn-back"><i class="bi bi-arrow-left"></i> Back to List</a>
+                <button type="submit" class="btn-create">
+                    <i class="bi bi-check-lg"></i> Create Opportunity
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Set default dates
+        const today = new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+
+        // Format to YYYY-MM-DD (required for date input)
+        const formatDate = (d) => d.toISOString().split('T')[0];
+
+        // ApplicationCloseDate = today
+        const appCloseInput = document.querySelector('input[name="ApplicationCloseDate"]');
+        if (appCloseInput && !appCloseInput.value) {
+            appCloseInput.value = formatDate(today);
+        }
+
+        // Date (opportunity date) = tomorrow
+        const dateInput = document.querySelector('input[name="Date"]');
+        if (dateInput && !dateInput.value) {
+            dateInput.value = formatDate(tomorrow);
+        }
+
+        function updateMap() {
+            const addr = document.getElementById('address').value;
+            if(addr.trim() === "") return;
+
+            document.getElementById('map').src =
+                `https://www.google.com/maps?q=${encodeURIComponent(addr)}&output=embed`;
+        }
+
+        //By WW
+        // Show/hide credit level div when emergency checkbox changes
+        const emergencyCheckbox = document.getElementById('IsEmergency');
+        if (emergencyCheckbox) {
+            emergencyCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                const creditDiv = document.getElementById('creditLevelDiv');
+                if (creditDiv) creditDiv.style.display = isChecked ? 'block' : 'none';
+            });
+        }
+
+        //By ANGEL
+        function toggleRecurrenceCount(value) {
+            document.getElementById('recurrenceCountDiv').style.display =
+                value !== 'None' ? 'block' : 'none';
+        }
+    </script>
+}
+
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #edf2f9;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .form-card h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #3f4079;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f0f2ff;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2d3e4f;
+        margin-bottom: 0.35rem;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .required-star {
+        color: #ef4444;
+        margin-left: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #8b92d1;
+        box-shadow: 0 0 0 3px rgba(139,146,209,0.1);
+    }
+
+    .input-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .input-group .form-control {
+        flex: 1;
+    }
+
+    .btn-search {
+        padding: 0.6rem 1.25rem;
+        background: #8b92d1;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-search:hover {
+        background: #7a82c5;
+    }
+
+    .map-frame {
+        margin-top: 0.75rem;
+    }
+
+    .map-frame iframe {
+        width: 100%;
+        height: 220px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .emergency-box {
+        background: #fff5f5;
+        border: 1px solid #fecaca;
+        border-radius: 16px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .emergency-box .form-check-label {
+        color: #b91c1c;
+    }
+
+    .credit-select {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #fee2e2;
+    }
+
+    .btn-create {
+        background: #8b92d1;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-create:hover {
+        background: #7a82c5;
+        transform: translateY(-1px);
+    }
+
+    .btn-back {
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .btn-back:hover {
+        color: #3f4079;
+        text-decoration: underline;
+    }
+
+    .text-danger {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #3f4079;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-header p {
+        color: #8e94a7;
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0;
+        padding-top: 1.5rem;
+    }
+</style>

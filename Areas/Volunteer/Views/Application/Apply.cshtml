@@ -1,0 +1,367 @@
+﻿@model OpenHandsVolunteerPlatform.ViewModels.ApplyViewModel
+
+@{
+    ViewData["Title"] = "Apply for Opportunity";
+}
+
+
+<div class="apply-container">
+    <!-- Page Header -->
+    <div style="margin-bottom: 1.5rem;">
+        <h1 style="font-size: 1.6rem; font-weight: 700; color: #3f4079; margin-bottom: 0.25rem;">Confirm Your Application</h1>
+        <p style="color: #8e94a7; font-size: 0.85rem;">Please review the details before submitting</p>
+    </div>
+
+    <!-- Opportunity Card -->
+    <div class="apply-card">
+        <div class="apply-card-header">
+            <h2><i class="bi bi-calendar-event"></i> Opportunity Details</h2>
+        </div>
+        <div class="apply-card-body">
+            <div class="opportunity-title">@Model.Opportunity.Title</div>
+            <div class="detail-row">
+                <span class="detail-label">Organization:</span>
+                <span class="detail-value">@Model.Opportunity.Organization.OrganizationName</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">@Model.Opportunity.Date.ToString("dddd, MMMM d, yyyy")</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Time:</span>
+                <span class="detail-value">@Model.Opportunity.StartTime.ToString(@"hh\:mm") - @Model.Opportunity.EndTime.ToString(@"hh\:mm")</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Location:</span>
+                <span class="detail-value">@Model.Opportunity.Location</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Volunteers Needed:</span>
+                <span class="detail-value">@Model.Opportunity.VolunteersNeeded</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conflict Warning -->
+    @if (Model.HasConflicts)
+    {
+        <div class="alert-danger">
+            <h5><i class="bi bi-exclamation-triangle-fill"></i> Schedule Conflict Detected - Cannot Apply</h5>
+            <p>You already have the following approved opportunity(s) on the same day at overlapping times:</p>
+            <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.25rem;">
+                @foreach (var conflict in Model.ConflictingOpportunities)
+                {
+                    <li><strong>@conflict.Title</strong> (@conflict.StartTime.ToString(@"hh\:mm") - @conflict.EndTime.ToString(@"hh\:mm"))</li>
+                }
+            </ul>
+            <p style="margin-top: 0.5rem; font-weight: 600;">You cannot apply for this opportunity due to schedule conflict.</p>
+        </div>
+    }
+
+    <!-- Waitlist Warning -->
+    @if (!Model.HasConflicts && !Model.HasAvailableSlot)
+    {
+        if (Model.IsWaitlistFull)
+        {
+            <div class="alert-danger">
+                <h5><i class="bi bi-x-circle"></i> Opportunity Full - Waitlist Full</h5>
+                <p>This opportunity has reached maximum capacity and the waitlist is full (@Model.MaxWaitlistSize volunteers). No more applications can be accepted.</p>
+            </div>
+        }
+        else
+        {
+            <div class="alert-warning">
+                <h5><i class="bi bi-clock-history"></i> Opportunity Full - Waitlist Available</h5>
+                <p>This opportunity currently has @Model.CurrentVolunteers out of @Model.Opportunity.VolunteersNeeded volunteers registered.</p>
+                <p class="mt-2">You'll be added to the waitlist (position @(Model.WaitlistCount + 1) of @Model.MaxWaitlistSize). If a spot opens up, you'll be automatically registered.</p>
+            </div>
+        }
+    }
+
+    <!-- Your Information Card -->
+    <div class="apply-card">
+        <div class="apply-card-header">
+            <h2><i class="bi bi-person-circle"></i> Your Information</h2>
+        </div>
+        <div class="apply-card-body">
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">@Model.Volunteer.Name</span>
+            </div>
+			<div class="info-row">
+				<span class="info-label">Age:</span>
+				<span class="info-value">@Model.Volunteer.Age</span>
+			</div>
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">@Model.Volunteer.User?.Email</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Phone:</span>
+                <span class="info-value">@Model.Volunteer.Phone</span>
+            </div>
+            <div class="info-note">
+                <i class="bi bi-info-circle"></i> This information will be shared with the organization.
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a asp-action="Details" asp-controller="Opportunities" asp-route-id="@Model.Opportunity.OpportunityId" class="btn-cancel">
+            Cancel
+        </a>
+
+        @if (!Model.HasConflicts && !Model.IsWaitlistFull)
+        {
+            <form asp-action="ConfirmApply" asp-route-id="@Model.Opportunity.OpportunityId" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-confirm">
+                    @if (Model.HasAvailableSlot)
+                    {
+                        <span><i class="bi bi-check-circle"></i> Confirm Application</span>
+                    }
+                    else
+                    {
+                        <span><i class="bi bi-clock"></i> Join Waitlist</span>
+                    }
+                </button>
+            </form>
+        }
+        else if (Model.HasConflicts)
+        {
+            <button type="button" class="btn-cancel" disabled style="cursor: not-allowed; opacity: 0.6;">
+                <i class="bi bi-exclamation-triangle"></i> Conflict - Cannot Apply
+            </button>
+        }
+        else if (Model.IsWaitlistFull)
+        {
+            <button type="button" class="btn-cancel" disabled style="cursor: not-allowed; opacity: 0.6;">
+                <i class="bi bi-x-circle"></i> Waitlist Full
+            </button>
+        }
+    </div>
+</div>
+
+<!-- ww fix -->
+<style>
+    .apply-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .apply-card {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid #edf2f9;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .apply-card-header {
+        background: #f5f7ff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #8b92d1;
+    }
+
+        .apply-card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #3f4079;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .apply-card-header h2 i {
+                color: #8b92d1;
+            }
+
+    .apply-card-body {
+        padding: 1.5rem;
+    }
+
+    .opportunity-details {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .opportunity-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #3f4079;
+        margin-bottom: 1rem;
+    }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-label {
+        width: 120px;
+        color: #8e94a7;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #2d3e4f;
+        flex: 1;
+    }
+
+    .info-row {
+        display: flex;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .info-label {
+        width: 100px;
+        color: #8e94a7;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #2d3e4f;
+        flex: 1;
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+        .alert-warning h5 {
+            color: #92400e;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .alert-warning p {
+            color: #92400e;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+    .alert-danger {
+        background: #fee2e2;
+        border-left: 4px solid #ef4444;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+        .alert-danger h5 {
+            color: #b91c1c;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .alert-danger p {
+            color: #b91c1c;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+    .alert-info {
+        background: #e0e4ff;
+        border-left: 4px solid #8b92d1;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+        .alert-info h5 {
+            color: #3f4079;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .alert-info p {
+            color: #3f4079;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+    .info-note {
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e9ecf3;
+        font-size: 0.8rem;
+        color: #8e94a7;
+        font-style: italic;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+    }
+
+    .btn-cancel {
+        padding: 0.7rem 1.75rem;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+        .btn-cancel:hover {
+            border-color: #8b92d1;
+            color: #3f4079;
+        }
+
+    .btn-confirm {
+        padding: 0.7rem 1.75rem;
+        background: #8b92d1;
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .btn-confirm:hover {
+            background: #7a82c5;
+            transform: translateY(-1px);
+        }
+
+        .btn-confirm:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+</style>

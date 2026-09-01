@@ -1,0 +1,79 @@
+﻿@* By ANGEL - admin side combined *@
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container mt-4">
+
+    <!-- Stats Cards -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; margin-bottom:2rem;">
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:1.5rem;">
+            <div class="meta-label">TOTAL OPPORTUNITIES</div>
+            <div style="font-size:2.5rem; font-weight:700; color:#8b92d1;">@ViewBag.TotalOpportunities</div>
+        </div>
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:1.5rem;">
+            <div class="meta-label">TOTAL ORGANIZATIONS</div>
+            <div style="font-size:2.5rem; font-weight:700; color:#8b92d1;">@ViewBag.TotalOrganizations</div>
+        </div>
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:1.5rem;">
+            <div class="meta-label">TOTAL VOLUNTEERS</div>
+            <div style="font-size:2.5rem; font-weight:700; color:#8b92d1;">@ViewBag.TotalVolunteers</div>
+        </div>
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:1.5rem;">
+            <div class="meta-label">UNSOLVED REPORTS</div>
+            <div style="font-size:2.5rem; font-weight:700; color:#e74c3c;">@ViewBag.UnsolvedReports</div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="info-card">
+        <h2 style="font-size:1.1rem; font-weight:700; color:#3f4079; margin-bottom:1.5rem; text-transform:uppercase; letter-spacing:0.5px;">
+            Volunteers Participation Engagement
+        </h2>
+        <canvas id="engagementChart" height="80"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const raw = @Html.Raw(ViewBag.MonthlyData);
+        const labels = raw.map(d => d.month);
+        const data = raw.map(d => d.count);
+
+        new Chart(document.getElementById('engagementChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Applications',
+                    data: data,
+                    backgroundColor: '#8b92d1',
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f0f2ff' },
+                        ticks: { color: '#8e94a7' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#8e94a7' }
+                    }
+                }
+            }
+        });
+    </script>
+}

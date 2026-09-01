@@ -1,0 +1,279 @@
+﻿@model List<Opportunity>
+@* By ANGEL *@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    ViewBag.Title = "Opportunities";
+    string currentStatus = ViewBag.CurrentStatus ?? "";
+
+    // Convert string to enum safely
+    OpportunityStatus currentStatusEnum = OpportunityStatus.Ongoing;
+    if (!string.IsNullOrEmpty(currentStatus))
+    {
+        Enum.TryParse<OpportunityStatus>(currentStatus, true, out currentStatusEnum);
+    }
+
+    var today = DateTime.Now.Date;
+    var currentTime = DateTime.Now.TimeOfDay;
+}
+
+<link rel="stylesheet" href="~/css/volunteerPage.css" asp-append-version="true" />
+
+
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Browse Opportunities</h1>
+    </div>
+
+    <!-- Action Bar -->
+    @* By WW *@
+    <div class="action-bar">
+        <div class="search-filter-group">
+            <!-- Filter Icon with Dropdown -->
+            <div class="dropdown">
+                <button class="filter-icon dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="filterDropdown" style="padding: 1rem; min-width: 250px;">
+                    <!-- Date Filter -->
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Date</label>
+                        <select id="dateFilter" class="form-select form-select-sm">
+                            <option value="all" selected="@(ViewBag.CurrentDateFilter == "all" ? "selected" : null)">All Dates</option>
+                            <option value="today" selected="@(ViewBag.CurrentDateFilter == "today" ? "selected" : null)">Today</option>
+                            <option value="week" selected="@(ViewBag.CurrentDateFilter == "week" ? "selected" : null)">This Week</option>
+                            <option value="month" selected="@(ViewBag.CurrentDateFilter == "month" ? "selected" : null)">This Month</option>
+                        </select>
+                    </li>
+
+                    <!-- Weekend/Weekday Filter -->
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Day Type</label>
+                        <select id="weekendFilter" class="form-select form-select-sm">
+                            <option value="all" selected="@(ViewBag.CurrentWeekendFilter == "all" ? "selected" : null)">All Days</option>
+                            <option value="weekday" selected="@(ViewBag.CurrentWeekendFilter == "weekday" ? "selected" : null)">Weekdays</option>
+                            <option value="weekend" selected="@(ViewBag.CurrentWeekendFilter == "weekend" ? "selected" : null)">Weekends</option>
+                        </select>
+                    </li>
+
+                    @* <!-- Location Filter -->
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Location</label>
+                        <input type="text" id="locationFilter" class="form-control form-control-sm" placeholder="Enter location..." value="@ViewBag.CurrentLocation">
+                    </li> *@
+
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <div class="d-flex gap-2">
+                            <button id="applyFilters" class="btn btn-primary btn-sm w-100">Apply Filters</button>
+                            <button id="clearFilters" class="btn btn-outline-secondary btn-sm w-100">Clear</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search opportunities..." value="@ViewBag.CurrentSearch">
+                <i class="bi bi-search search-icon-right"></i>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Results Count -->
+    <div style="margin-bottom: 1rem; color: #8e94a7; font-size: 0.9rem;">
+        Showing: @Model.Count
+    </div>
+
+    <!-- Opportunities Grid -->
+    <div class="opportunity-grid" id="opportunityGrid">
+        @if (Model.Any())
+        {
+            foreach (var opportunity in Model)
+            {
+                bool isToday = opportunity.Date.Date == today;
+                bool isFutureDate = opportunity.Date.Date > today;
+
+                bool isOngoing =
+                isToday &&
+                opportunity.StartTime <= currentTime &&
+                opportunity.EndTime > currentTime;
+
+                bool isUpcoming =
+                isFutureDate ||
+                (isToday && opportunity.StartTime > currentTime);
+
+                var currentStatusCard = isOngoing
+                ? OpportunityStatus.Ongoing
+                : isUpcoming
+                ? OpportunityStatus.Upcoming
+                : OpportunityStatus.Past;
+
+                @* By WW *@
+                <div class="opportunity-card @(opportunity.IsEmergency ? "emergency" : "")">
+                    <div class="opportunity-card-header">
+                        <h3 class="card-title">
+                            @opportunity.Title
+                            @if (opportunity.IsEmergency)
+                            {
+                                <span class="emergency-badge">URGENT</span>
+                            }
+                        </h3>
+                        <span class="status-badge status-@currentStatusCard.ToString().ToLower()">
+                            @currentStatusCard.ToString().ToUpper()
+                        </span>
+                    </div>
+
+                    @* <div class="card-subtitle">@opportunity.Location</div> *@
+
+                    <i class="bi bi-geo" style="color:#6b7280; margin-bottom: 1.5rem"><span class="card-description">  @opportunity.Location</span></i>
+
+                    <ul class="metadata-list">
+                        <li class="metadata-item">
+                            <i class="bi bi-calendar3"></i>
+                            <span>@opportunity.Date.ToString("dd MMM yyyy")</span>
+                        </li>
+                        <li class="metadata-item">
+                            <i class="bi bi-clock"></i>
+                            <span>@opportunity.StartTime.ToString(@"hh\:mm") - @opportunity.EndTime.ToString(@"hh\:mm")</span>
+                        </li>
+                        <li class="metadata-item">
+                            <i class="bi bi-people"></i>
+                            <span>@opportunity.VolunteersNeeded volunteers needed</span>
+                        </li>
+                    </ul>
+
+                    <a asp-area="Volunteer"
+                        asp-controller="Opportunities"
+                        asp-action="Details"
+                        asp-route-id="@opportunity.OpportunityId"
+                        class="btn-view-details">
+                        @(ViewBag.AppliedIds != null && ((HashSet<string>)ViewBag.AppliedIds).Contains(opportunity.OpportunityId)
+                                            ? "View Details (Applied)"
+                                            : "View Details")
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <h3>No @currentStatus opportunities</h3>
+                <p>There are no @currentStatus opportunities available at the moment.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Client-side search functionality -->
+<script>
+    //BY WW
+    // Filter functionality
+    document.getElementById('applyFilters').addEventListener('click', function() {
+        const dateFilter = document.getElementById('dateFilter').value;
+        const weekendFilter = document.getElementById('weekendFilter').value;
+        const locationFilter = document.getElementById('locationFilter').value;
+        const searchTerm = document.getElementById('searchInput').value;
+
+        window.location.href = `@Url.Action("Index")?search=${encodeURIComponent(searchTerm)}&dateFilter=${dateFilter}&weekendFilter=${weekendFilter}&location=${encodeURIComponent(locationFilter)}`;
+    });
+
+    document.getElementById('clearFilters').addEventListener('click', function() {
+        window.location.href = `@Url.Action("Index")`;
+    });
+
+    // Search with Enter key
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('applyFilters').click();
+        }
+    });
+
+    // Live search count update
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.opportunity-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+            const description = card.querySelector('.card-description')?.textContent.toLowerCase() || '';
+            const location = card.querySelector('.card-subtitle')?.textContent.toLowerCase() || '';
+
+            if (title.includes(searchTerm) || description.includes(searchTerm) || location.includes(searchTerm)) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Update the visible count
+        document.getElementById('visibleCount').innerText = visibleCount;
+
+        // Show/hide empty state message
+        const grid = document.getElementById('opportunityGrid');
+        const existingEmpty = document.querySelector('.search-empty-state');
+
+        if (visibleCount === 0) {
+            if (!existingEmpty) {
+                const searchEmpty = document.createElement('div');
+                searchEmpty.className = 'empty-state search-empty-state';
+                searchEmpty.innerHTML = `
+                    <i class="bi bi-search"></i>
+                    <h3>No results found</h3>
+                    <p>No opportunities match your search criteria.</p>
+                `;
+                grid.appendChild(searchEmpty);
+            }
+        } else {
+            if (existingEmpty) existingEmpty.remove();
+        }
+        // document.getElementById('searchInput').addEventListener('keyup', function() {
+        //     const searchTerm = this.value.toLowerCase();
+        //     const cards = document.querySelectorAll('.opportunity-card');
+
+        //     cards.forEach(card => {
+        //         const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+        //         const description = card.querySelector('.card-description')?.textContent.toLowerCase() || '';
+        //         const location = card.querySelector('.card-subtitle')?.textContent.toLowerCase() || '';
+
+        //         if (title.includes(searchTerm) || description.includes(searchTerm) || location.includes(searchTerm)) {
+        //             card.style.display = 'flex';
+        //         } else {
+        //             card.style.display = 'none'; 
+        //         }
+        //     });
+
+        //     Show/hide empty state message
+        //     const visibleCards = document.querySelectorAll('.opportunity-card[style="display: flex;"]').length;
+        //     const emptyState = document.querySelector('.empty-state');
+
+        //     if (visibleCards === 0 && !emptyState) {
+        //         Create temporary empty state if none exists
+        //         const grid = document.getElementById('opportunityGrid');
+        //         if (!document.querySelector('.search-empty-state')) {
+        //             const searchEmpty = document.createElement('div');
+        //             searchEmpty.className = 'empty-state search-empty-state';
+        //             searchEmpty.innerHTML = `
+        //                 <i class="bi bi-search"></i>
+        //                 <h3>No results found</h3>
+        //                 <p>No opportunities match your search criteria.</p>
+        //             `;
+        //             grid.appendChild(searchEmpty);
+        //         }
+        //     } else {
+        //         const searchEmpty = document.querySelector('.search-empty-state');
+        //         if (searchEmpty) searchEmpty.remove();
+        //     }
+    });
+</script>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+

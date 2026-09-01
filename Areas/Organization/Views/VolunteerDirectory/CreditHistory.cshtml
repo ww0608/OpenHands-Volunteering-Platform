@@ -1,0 +1,141 @@
+﻿@* By WW *@
+
+@model List<OpenHandsVolunteerPlatform.Models.CreditScoreHistory>
+@using OpenHandsVolunteerPlatform.Models.Enums
+@{
+    var volunteerName = ViewBag.VolunteerName;
+    var completedEvents = ViewBag.CompletedEvents;
+    var noShowCount = ViewBag.NoShowCount;
+    var totalHours = ViewBag.TotalHours;
+    var currentLevel = ViewBag.CreditLevel as CreditLevel? ?? CreditLevel.Growing;
+}
+
+<link rel="stylesheet" href="~/css/CreditHistory.css" asp-append-version="true" />
+
+<div class="credit-history-modal">
+    <div class="modal-header" style="background: #f5f7ff; border-bottom: 2px solid #8b92d1; border-radius: 16px 16px 0 0; padding: 1.25rem 1.5rem;">
+        <h5 class="modal-title" style="color: #3f4079; font-weight: 700; font-size: 1.25rem;">
+            <i class="bi bi-star-fill" style="color: #8b92d1; margin-right: 0.5rem;"></i>
+            Credit Score History - @volunteerName
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+
+    <div class="modal-body" style="padding: 1.5rem;">
+        <!-- Current Credit Score Card -->
+        <div style="border: 2px solid #8b92d1; border-radius: 16px; margin-bottom: 1.5rem; background: white;">
+            <div style="padding: 1.25rem;">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <!-- Current Credit Level Display -->
+                        <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.25rem;">Current Credit Level</div>
+                        <div style="font-size: 2rem; font-weight: 700;
+                            @(currentLevel == CreditLevel.Inactive ? "color: #ef4444;" :
+                                                                                        currentLevel == CreditLevel.Core ? "color: #10b981;" :
+                                                                                        "color: #f59e0b;")">
+
+                            @(currentLevel == CreditLevel.Inactive ? "LOW" :
+                                                        currentLevel == CreditLevel.Core ? "HIGH" :
+                                                        "AVERAGE")
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div style="display: flex !important; justify-content: space-around !important; text-align: center !important;">
+                            <div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #3f4079;">@completedEvents</div>
+                                <div style="font-size: 0.85rem; color: #64748b;">Completed</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #3f4079;">@noShowCount</div>
+                                <div style="font-size: 0.85rem; color: #64748b;">No-Shows</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #3f4079;">@totalHours</div>
+                                <div style="font-size: 0.85rem; color: #64748b;">Hours</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credit Score Formula -->
+        <div style="background: #e0e4ff; border: none; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; color: #2d3e4f;">
+            <i class="bi bi-info-circle-fill" style="color: #8b92d1; margin-right: 0.5rem;"></i>
+            <strong>How Credit Score Works:</strong>
+            <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.5rem;">
+                <li>
+                    ⭐ <strong>Core (High)</strong> - Complete 5 or more events
+                </li>
+
+                <li>
+                    📈 <strong>Growing (Average)</strong> - Default level for all volunteers with 0–4 completed events
+                    <br />
+                    <span style="font-size: 0.85rem; color: #64748b;">
+                        Must maintain good attendance (less than 3 no-shows)
+                    </span>
+                </li>
+
+                <li>
+                    ⚠️ <strong>Inactive (Low)</strong> - 3 or more no-shows AND fewer than 2 completed events
+                    <br />
+                    <span style="font-size: 0.85rem; color: #64748b;">
+                        Recovery possible by completing at least 2 events
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- History Timeline -->
+        @if (Model.Any())
+        {
+            <h6 style="color: #3f4079; font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">
+                <i class="bi bi-clock-history" style="color: #8b92d1; margin-right: 0.5rem;"></i>
+                Credit Score Changes
+            </h6>
+
+            <div style="max-height: 300px; overflow-y: auto; padding-right: 0.5rem;">
+                @foreach (var item in Model)
+                {
+                    <div style="border: 1px solid #edf2f9; border-radius: 12px; margin-bottom: 0.5rem; background: white; transition: transform 0.2s;">
+                        <div style="padding: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <div>
+                                    <span style="padding: 0.4rem 0.8rem; border-radius: 50px; font-weight: 600; font-size: 0.8rem; color: white; display: inline-block; margin-right: 0.5rem; background: @(item.NewLevel == CreditLevel.Core ? "#10b981" : item.NewLevel == CreditLevel.Growing ? "#f59e0b" : "#ef4444");">
+                                        @item.NewLevel
+                                    </span>
+                                    <i class="bi bi-arrow-right" style="color: #8e94a7; font-size: 0.9rem; margin: 0 0.25rem;"></i>
+                                    <span style="padding: 0.4rem 0.8rem; border-radius: 50px; font-weight: 600; font-size: 0.8rem; color: white; display: inline-block; background: @(item.PreviousLevel == CreditLevel.Core ? "#10b981" : item.PreviousLevel == CreditLevel.Growing ? "#f59e0b" : item.PreviousLevel == CreditLevel.Inactive ? "#ef4444" : "#64748b");">
+                                        @item.PreviousLevel
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: #8e94a7;">
+                                    @item.ChangedAt.ToString("dd MMM yyyy, HH:mm")
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; color: #2d3e4f;">
+                                <i class="bi bi-info-circle" style="color: #8e94a7; font-size: 0.8rem; margin-right: 0.25rem;"></i>
+                                @item.Reason
+                                @if (item.Opportunity != null)
+                                {
+                                    <span style="color: #64748b; font-style: italic;"> - @item.Opportunity.Title</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 2rem; color: #8e94a7;">
+                <i class="bi bi-star" style="font-size: 2.5rem; color: #d8ddff; margin-bottom: 1rem;"></i>
+                <p style="margin-top: 0.5rem;">No credit score history yet</p>
+            </div>
+        }
+    </div>
+
+    <div class="modal-footer" style="border-top: 1px solid #e9ecf3; padding: 1rem 1.5rem;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</div>

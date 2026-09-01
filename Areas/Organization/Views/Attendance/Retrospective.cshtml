@@ -1,0 +1,301 @@
+﻿@model OpenHandsVolunteerPlatform.ViewModels.ManageAttendanceViewModel
+@using OpenHandsVolunteerPlatform.Models.Enums
+
+@{
+    ViewData["Title"] = $"Retrospective - {Model.OpportunityTitle}";
+    var eventHours = ViewBag.EventHours ?? 0;
+    var totalVolunteerHours = ViewBag.TotalVolunteerHours ?? 0;
+    var attendanceRate = ViewBag.AttendanceRate ?? 0;
+    var presentCount = ViewBag.PresentCount ?? 0;
+    var noShowCount = ViewBag.NoShowCount ?? 0;
+    var pendingCount = ViewBag.PendingCount ?? 0;
+    var creditBreakdown = ViewBag.CreditBreakdown ?? new { High = 0, Average = 0, Low = 0 };
+    var completedDate = ViewBag.CompletedDate as DateTime? ?? Model.EventDate;
+}
+
+<!-- Link to external CSS -->
+<link rel="stylesheet" href="~/css/Retrospective.css" asp-append-version="true" />
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <!-- ww fix -->
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" style="font-size: 0.85rem; margin-bottom: 1rem;">
+            <a href="@Url.Action("Index", "Opportunity")" style="font-size: 0.85rem;">Opportunities</a>
+            <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
+            <a href="@Url.Action("Details", "Opportunity", new { id = Model.OpportunityId })" style="font-size: 0.85rem;">@Model.OpportunityTitle</a>
+            <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
+            <span style="font-size: 0.85rem;">Retrospective</span>
+        </div>
+
+        <!-- Header -->
+        <div class="header-section">
+            <div class="header-title">@Model.OpportunityTitle</div>
+            <div class="header-info">
+                <span class="info-item">
+                    <i class="bi bi-calendar3"></i> @completedDate.ToString("dddd, dd MMMM yyyy")
+                </span>
+                <span class="info-item">
+                    <i class="bi bi-clock"></i> @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
+                </span>
+                <span class="info-item">
+                    <i class="bi bi-geo-alt"></i> @Model.Location
+                </span>
+            </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="export-section">
+            <a href="@Url.Action("ExportPdf", "Attendance", new { id = Model.OpportunityId })" class="btn-export btn-export-pdf">
+                <i class="bi bi-file-earmark-pdf"></i> Export PDF Report
+            </a>
+            <a href="@Url.Action("ExportDetailedCsv", "Attendance", new { id = Model.OpportunityId })" class="btn-export btn-export-excel">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Export Excel/CSV
+            </a>
+        </div>
+
+        @* By ANGEL from Details.cshtml *@
+        <!-- ww fix -->
+        <a asp-area="Organization" asp-controller="Opportunity" asp-action="IssueCertificates" asp-route-id="@Model.OpportunityId"
+           style="display:inline-flex; align-items:center; gap:0.5rem; background:#2d7a2d; color:white; padding:0.75rem 1.5rem;
+            border-radius:12px; font-weight:600; text-decoration:none;
+            font-size:0.9rem; border:none; cursor:pointer;
+            box-shadow:0 2px 8px rgba(45,122,45,0.25); margin-bottom:1.5rem;">
+            <i class="bi bi-file-earmark-check"></i> 
+            Issue Certificates
+        </a>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">@Model.TotalVolunteers</div>
+                <div class="stat-label">Registered Volunteers</div>
+                <div class="stat-trend trend-up">
+                    <i class="bi bi-arrow-up"></i> Fully booked
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">@presentCount</div>
+                <div class="stat-label">Present</div>
+                <div class="stat-trend">
+                    <i class="bi bi-clock"></i> @attendanceRate% attendance
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">@noShowCount</div>
+                <div class="stat-label">No-Show</div>
+                <div class="stat-trend">
+                    <i class="bi bi-clock"></i> @(Model.TotalVolunteers > 0 ? Math.Round((noShowCount / (double)Model.TotalVolunteers) * 100, 1) : 0)% no-show
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">@totalVolunteerHours</div>
+                <div class="stat-label">Total Hours</div>
+                <div class="stat-trend">
+                    <i class="bi bi-clock"></i> @Math.Round(eventHours, 1) hrs/volunteer
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="bi bi-pie-chart"></i> Attendance Breakdown
+                </div>
+                <div class="chart-container">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="bi bi-bar-chart"></i> Volunteer Credit Levels
+                </div>
+                <div class="chart-container">
+                    <canvas id="creditChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Summary -->
+        <div class="performance-section">
+            <div class="chart-title">
+                <i class="bi bi-graph-up"></i> Performance Summary
+            </div>
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <div class="performance-value">@attendanceRate%</div>
+                    <div class="performance-label">Attendance Rate</div>
+                    @{
+                        string rateClass = attendanceRate >= 90 ? "badge-excellent" :
+                        attendanceRate >= 75 ? "badge-good" :
+                        attendanceRate >= 50 ? "badge-fair" : "badge-poor";
+                        string rateText = attendanceRate >= 90 ? "Excellent" :
+                        attendanceRate >= 75 ? "Good" :
+                        attendanceRate >= 50 ? "Fair" : "Poor";
+                    }
+                    <span class="performance-badge @rateClass">@rateText</span>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-value">@presentCount/@Model.TotalVolunteers</div>
+                    <div class="performance-label">Volunteer Reliability</div>
+                    <div class="stat-trend">
+                        @presentCount of @Model.TotalVolunteers showed up
+                    </div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-value">@creditBreakdown.High/@creditBreakdown.Average/@creditBreakdown.Low</div>
+                    <div class="performance-label">High/Avg/Low Credit</div>
+                    <div class="stat-trend">
+                        @creditBreakdown.High Core, @creditBreakdown.Average Growing, @creditBreakdown.Low Inactive
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volunteer Attendance Record -->
+        <div class="table-section">
+            <div class="table-title">
+                <i class="bi bi-list-check"></i> Volunteer Attendance Record
+            </div>
+
+            @if (Model.Volunteers.Any())
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Credit Level</th>
+                            <th>Attendance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Volunteers.Count; i++)
+                        {
+                            var volunteer = Model.Volunteers[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td><strong>@volunteer.VolunteerName</strong></td>
+                                <td>@volunteer.Email</td>
+                                <td>@volunteer.Phone</td>
+                                <td>
+                                    @{
+                                        string creditClass = volunteer.AttendanceStatus == AttendanceStatus.Present ? "credit-high" :
+                                        (volunteer.AttendanceStatus == AttendanceStatus.NoShow ? "credit-low" : "credit-average");
+                                        string creditText = volunteer.AttendanceStatus == AttendanceStatus.Present ? "HIGH" :
+                                        (volunteer.AttendanceStatus == AttendanceStatus.NoShow ? "LOW" : "AVERAGE");
+                                    }
+                                    <span class="credit-badge @creditClass">@creditText</span>
+                                </td>
+                                <td>
+                                    @if (volunteer.AttendanceStatus == AttendanceStatus.Present)
+                                    {
+                                        <span class="attendance-badge badge-present">Present</span>
+                                    }
+                                    else if (volunteer.AttendanceStatus == AttendanceStatus.NoShow)
+                                    {
+                                        <span class="attendance-badge badge-noshow">No-Show</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="attendance-badge badge-pending">Pending</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="bi bi-people"></i>
+                    <h3>No volunteers attended</h3>
+                    <p>There were no volunteers registered for this opportunity.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Attendance Chart
+        const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(attendanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present (@presentCount)', 'No-Show (@noShowCount)', 'Pending (@pendingCount)'],
+                datasets: [{
+                    data: [@presentCount, @noShowCount, @pendingCount],
+                    backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+
+        // Credit Chart
+        const creditCtx = document.getElementById('creditChart').getContext('2d');
+        new Chart(creditCtx, {
+            type: 'bar',
+            data: {
+                labels: ['High (Core)', 'Average (Growing)', 'Low (Inactive)'],
+                datasets: [{
+                    label: 'Number of Volunteers',
+                    data: [@creditBreakdown.High, @creditBreakdown.Average, @creditBreakdown.Low],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

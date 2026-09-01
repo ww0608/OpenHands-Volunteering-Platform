@@ -1,0 +1,124 @@
+﻿@* By ANGEL - admin side combined *@
+
+@using OpenHandsVolunteerPlatform.Models.Enums
+@model OpenHandsVolunteerPlatform.Models.Report
+
+@{
+    ViewData["Title"] = "Review Report";
+}
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container mt-4">
+
+    <a asp-area="Admin" asp-controller="Report" asp-action="Index"
+       style="color:#8b92d1; text-decoration:none; font-size:0.9rem;">
+        <i class="bi bi-arrow-left"></i> Back to Reports
+    </a>
+
+    <h1 style="font-size:2rem; font-weight:700; color:#3f4079; margin:1rem 0 0.25rem;">
+        Review Report
+    </h1>
+    <p style="color:#8e94a7; margin-bottom:2rem;">Take action on this flagged content.</p>
+
+    <!-- Report Details -->
+    <div style="background:white; border-radius:24px; padding:2rem;
+                border:1px solid #edf2f9; margin-bottom:1.5rem;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">TARGET</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@ViewBag.TargetName</p>
+            </div>
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">TYPE</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@Model.TargetType</p>
+            </div>
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">REPORTED BY</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@(Model.Reporter?.Email ?? "-")</p>
+            </div>
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">DATE</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">
+                    @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")
+                </p>
+            </div>
+            <div style="grid-column:1/-1;">
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">REASON</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@Model.Reason</p>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Details))
+            {
+                <div style="grid-column:1/-1;">
+                    <p style="color:#8e94a7; font-size:0.8rem; margin:0;">DETAILS</p>
+                    <p style="color:#4b5563; margin:0;">@Model.Details</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.Status == ReportStatus.Pending)
+    {
+        <!-- Resolve -->
+        <div style="background:white; border-radius:24px; padding:2rem;
+                        border:1px solid #edf2f9; margin-bottom:1rem;">
+            <h3 style="color:#3f4079; font-size:1.1rem; margin-bottom:1rem;">
+                <i class="bi bi-check-circle" style="color:#2d7a2d;"></i> Resolve Report
+            </h3>
+            <form method="post" asp-area="Admin" asp-controller="Report" asp-action="Resolve"
+                  asp-route-id="@Model.ReportId">
+                @Html.AntiForgeryToken()
+                <textarea name="adminNote" rows="3" placeholder="Add a note (optional)..."
+                      style="width:100%; padding:0.75rem; border:1px solid #e2e8f0;
+                                 border-radius:12px; margin-bottom:1rem; font-size:0.9rem;">
+                    </textarea>
+                <button type="submit"
+                        style="background:#2d7a2d; color:white; border:none; padding:0.75rem 1.5rem;
+                                   border-radius:12px; font-weight:600; cursor:pointer;">
+                    <i class="bi bi-check-lg"></i> Mark as Resolved
+                </button>
+            </form>
+        </div>
+
+        <!-- Dismiss -->
+        <div style="background:white; border-radius:24px; padding:2rem; border:1px solid #edf2f9;">
+            <h3 style="color:#3f4079; font-size:1.1rem; margin-bottom:1rem;">
+                <i class="bi bi-x-circle" style="color:#8e94a7;"></i> Dismiss Report
+            </h3>
+            <form method="post" asp-area="Admin" asp-controller="Report" asp-action="Dismiss"
+                  asp-route-id="@Model.ReportId">
+                @Html.AntiForgeryToken()
+                <textarea name="adminNote" rows="3" placeholder="Reason for dismissal (optional)..."
+                      style="width:100%; padding:0.75rem; border:1px solid #e2e8f0;
+                                 border-radius:12px; margin-bottom:1rem; font-size:0.9rem;">
+                    </textarea>
+                <button type="submit"
+                        style="background:#8e94a7; color:white; border:none; padding:0.75rem 1.5rem;
+                                   border-radius:12px; font-weight:600; cursor:pointer;">
+                    <i class="bi bi-x-lg"></i> Dismiss
+                </button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div style="background:white; border-radius:24px; padding:2rem; border:1px solid #edf2f9;">
+            <p style="color:#8e94a7; margin:0;">
+                This report has already been
+                <strong>@Model.Status.ToString().ToLower()</strong>
+                @if (Model.ResolvedAt.HasValue)
+                {
+                    <span>on @Model.ResolvedAt.Value.ToString("dd MMM yyyy")</span>
+                }
+            </p>
+            @if (!string.IsNullOrEmpty(Model.AdminNote))
+            {
+                <p style="margin-top:0.5rem; color:#4b5563;">
+                    <strong>Admin note:</strong> @Model.AdminNote
+                </p>
+            }
+        </div>
+    }
+</div>

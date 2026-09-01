@@ -1,0 +1,209 @@
+﻿@* By ANGEL *@
+
+@model List<OpenHandsVolunteerPlatform.Models.Organization>
+
+@{
+    ViewData["Title"] = "Organizations";
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<!-- ww fix -->
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">Browse Organizations</h1>
+        <p style="color:#8e94a7; margin-top:-1rem;">Discover and connect with verified organizations</p>
+    </div>
+</div>
+
+<div class="container-custom" style="max-width:1300px; margin:2rem auto; padding:0 2rem;">
+    <!-- Search -->
+    <div class="action-bar">
+        <div></div>
+        <!--ww fix-->
+        <div class="search-filter-group">
+            <!-- Filter Icon with Dropdown -->
+            <div class="dropdown">
+                <button class="filter-icon dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="padding: 1rem; min-width: 280px;">
+                    <!-- Mission Filter-->
+                    @* <li class="mb-2">
+                        <label class="form-label fw-bold">Search in Mission</label>
+                        <input type="text" id="missionFilter" class="form-control form-control-sm"
+                               placeholder="Enter mission...">
+                    </li> *@
+                    <!-- Category Filter - DROPDOWN -->
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Organization Type</label>
+                        <select id="typeFilter" class="form-select form-select-sm">
+                            <option value="all">All Types</option>
+                            <option value="Non-Profit">Non-Profit</option>
+                            <option value="Charity">Charity</option>
+                            <option value="Community Organization">Community Organization</option>
+                            <option value="Educational Institution">Educational Institution</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </li>
+                    <!-- Sort By - DROPDOWN -->
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Sort By</label>
+                        <select id="sortFilter" class="form-select form-select-sm">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="name">Name (A-Z)</option>
+                            <option value="followers">Most Followers</option>
+                        </select>
+                    </li>
+                    @* <li><hr class="dropdown-divider"></li> *@
+                    <li>
+                        <div class="d-flex gap-2 mt-4">
+                            <button id="applyFilters" class="btn btn-primary btn-sm w-100">Apply Filters</button>
+                            <button id="clearFilters" class="btn btn-outline-secondary btn-sm w-100">Clear</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search..." />
+                <i class="bi bi-search search-icon-right"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="opportunity-grid" id="orgGrid">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-building-x"></i>
+                <h3>No organizations found</h3>
+                <p>Check back later for verified organizations.</p>
+            </div>
+        }
+        @foreach (var org in Model)
+        {
+            <div class="opportunity-card org-card-item" style="text-align:center;"
+                 data-type="@org.OrganizationType"
+                 data-name="@org.OrganizationName"
+                 data-create="@org.CreatedAt.Ticks">
+                <!-- Logo -->
+                <div style="margin-bottom:1rem;">
+                    @if (!string.IsNullOrEmpty(org.LogoPath))
+                    {
+                        <img src="@Url.Content("~" + org.LogoPath)"
+                             style="width:80px; height:80px; object-fit:cover; border-radius:50%; border:2px solid #edf2f9; margin:0 auto;" />
+                    }
+                    else
+                    {
+                        <div style="width:80px; height:80px; border-radius:50%; background:#f0f2ff;
+                                            display:flex; align-items:center; justify-content:center; margin:0 auto;
+                                            border:2px solid #edf2f9;">
+                            <i class="bi bi-building" style="font-size:2rem; color:#8b92d1;"></i>
+                        </div>
+                    }
+                </div>
+
+                <!-- Name -->
+                <h3 class="card-title" style="text-align:center; margin-bottom:0.25rem;">
+                    @org.OrganizationName
+                </h3>
+
+                <!-- Short info -->
+                <p style="font-size:0.8rem; color:#8e94a7; margin-bottom:0.75rem; font-weight:600;">
+                    Short info
+                </p>
+                <p class="card-description" style="text-align:center;">
+                    @(org.Mission ?? "No mission statement provided.")
+                </p>
+
+                <!--ww fix-->
+                <!-- Org type -->
+                <div style="text-align:left; margin-bottom:0.5rem;">
+                    <p style="font-size:0.8rem; font-weight:700; color:#2d3e4f; margin:0;">ORG type</p>
+                    <p style="font-size:0.85rem; color:#4b5563; margin:0;">@(org.OrganizationType ?? "Not specified")</p>
+                </div>
+
+                <!-- Mission statement -->
+                <div style="text-align:left; margin-bottom:1rem;">
+                    <p style="font-size:0.8rem; font-weight:700; color:#2d3e4f; margin:0;">Mission statement</p>
+                    <p style="font-size:0.8rem; color:#4b5563; margin:0; line-height:1.5;">
+                        @(org.Mission?.Length > 100
+                                            ? org.Mission.Substring(0, 100) + "..."
+                                            : org.Mission ?? "-")
+                    </p>
+                </div>
+
+                <!-- View Details button -->
+                <a asp-area="Volunteer" asp-controller="Organizations" asp-action="Profile" asp-route-id="@org.OrganizationId"
+                   class="btn-view-details">
+                    View Details
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const typeFilter = document.getElementById('typeFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const applyBtn = document.getElementById('applyFilters');
+        const clearBtn = document.getElementById('clearFilters');
+
+        function filterAndSort() {
+            const search = searchInput.value.toLowerCase();
+            const type = typeFilter.value.toLowerCase();
+            const sort = sortFilter.value;
+
+            const grid = document.getElementById('orgGrid');
+            const cards = Array.from(grid.querySelectorAll('.opportunity-card'));
+
+            // FILTER
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+                const desc = card.querySelector('.card-description')?.textContent.toLowerCase() || '';
+                const cardType = card.dataset.type?.toLowerCase() || '';
+
+                const matchSearch = title.includes(search) || desc.includes(search);
+                const matchType = type === 'all' || cardType === type;
+
+                card.style.display = (matchSearch && matchType) ? 'flex' : 'none';
+            });
+
+            // SORT
+            const visibleCards = cards.filter(c => c.style.display !== 'none');
+
+            visibleCards.sort((a, b) => {
+                switch (sort) {
+                    case 'name':
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                    case 'oldest':
+                        return a.dataset.followed - b.dataset.followed;
+                    case 'followers':
+                        return b.dataset.followers - a.dataset.followers;
+                    default:
+                        return b.dataset.followed - a.dataset.followed;
+                }
+            });
+
+            // RE-APPEND
+            visibleCards.forEach(card => grid.appendChild(card));
+        }
+
+        // EVENTS
+        searchInput.addEventListener('keyup', filterAndSort);
+        applyBtn.addEventListener('click', filterAndSort);
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            typeFilter.value = 'all';
+            sortFilter.value = 'recent';
+            filterAndSort();
+        });
+    </script>
+}

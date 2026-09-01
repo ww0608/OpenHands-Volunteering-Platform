@@ -1,0 +1,162 @@
+﻿@*By ANGEL*@
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var org = ViewBag.Organization as OpenHandsVolunteerPlatform.Models.Organization;
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div style="max-width:1200px; margin:2rem auto; padding:0 2rem;">
+
+    <!-- Stats Cards matching wireframe page 12 -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; margin-bottom:2rem;">
+
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start;
+                                       gap:0.25rem; padding:1.75rem;">
+            <div style="font-size:2.5rem; font-weight:700; color:#8b92d1;">
+                @ViewBag.TotalHours <span style="font-size:1rem; color:#8e94a7;">hrs</span>
+            </div>
+            <div class="meta-label">TOTAL IMPACT</div>
+        </div>
+
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start;
+                                       gap:0.25rem; padding:1.75rem;">
+            <div style="font-size:2.5rem; font-weight:700; color:#2d7a2d;">
+                @ViewBag.ActiveVolunteers
+            </div>
+            <div class="meta-label">ACTIVE VOLUNTEERS</div>
+        </div>
+
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start;
+                                       gap:0.25rem; padding:1.75rem;">
+            <div style="font-size:2.5rem; font-weight:700; color:#8b92d1;">
+                @ViewBag.TotalOpportunities
+            </div>
+            <div class="meta-label">TOTAL EVENTS HOSTED</div>
+        </div>
+
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start;
+                                       gap:0.25rem; padding:1.75rem;">
+            <div style="font-size:2.5rem; font-weight:700; color:#f0a500;">
+                @ViewBag.FollowersCount
+            </div>
+            <div class="meta-label">FOLLOWERS</div>
+        </div>
+
+    </div>
+
+	<!-- ANGEL fix-->
+    <!-- Ratings Section -->
+    @{
+        var ratingCount = ViewBag.RatingCount as int? ?? 0;
+        var avgRating = ViewBag.AverageRating as double? ?? 0;
+        var recentRatings = ViewBag.RecentRatings as
+        List<OpenHandsVolunteerPlatform.Models.OrganizationRating> ?? new();
+    }
+    @if (ratingCount > 0)
+    {
+        <div class="info-card" style="margin-bottom:2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2 style="font-size:1.1rem; font-weight:700; color:#3f4079; margin:0;">
+                    Volunteer Ratings
+                </h2>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="bi @(i <= (int)avgRating ? "bi-star-fill" : "bi-star")"
+                           style="color:#f0a500; font-size:1rem;"></i>
+                    }
+                    <span style="font-weight:700; color:#2d3e4f;">@avgRating</span>
+                    <span style="color:#8e94a7; font-size:0.85rem;">(@ratingCount reviews)</span>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                @foreach (var rating in recentRatings)
+                {
+                    <div style="padding:1rem; background:#f8fafc; border-radius:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <strong style="color:#2d3e4f; font-size:0.9rem;">
+                                    @(rating.Volunteer?.Name ?? "Volunteer")
+                                </strong>
+                                <div style="margin-top:0.25rem;">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi @(i <= rating.Stars ? "bi-star-fill" : "bi-star")"
+                                           style="color:#f0a500; font-size:0.85rem;"></i>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(rating.Comment))
+                                {
+                                    <p style="color:#4b5563; font-size:0.85rem; margin:0.5rem 0 0;">
+                                        "@rating.Comment"
+                                    </p>
+                                }
+                            </div>
+                            <span style="color:#8e94a7; font-size:0.8rem; white-space:nowrap;">
+                                @rating.RatedAt.ToString("dd MMM yyyy")
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+	@* @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    } *@
+
+    <!-- Ongoing Activities -->
+    @{
+        var ongoingOpps = (ViewBag.OngoingOpportunities as
+        List<OpenHandsVolunteerPlatform.Models.Opportunity>) ?? new();
+    }
+    @if (ongoingOpps.Any())
+    {
+        <div class="info-card" style="margin-bottom:2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2 style="font-size:1.1rem; font-weight:700; color:#3f4079; margin:0;">
+                    Ongoing Activities
+                </h2>
+                <a asp-area="Organization" asp-controller="Opportunity" asp-action="Index"
+                   asp-route-status="ongoing"
+                   style="font-size:0.85rem; color:#8b92d1; text-decoration:none;">View All</a>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                @foreach (var opp in ongoingOpps)
+                {
+                    var activeCount = opp.Applications?
+                    .Count(a => a.Status == ApplicationStatus.Applied) ?? 0;
+                    <div style="display:flex; justify-content:space-between; align-items:center;
+                                        padding:1rem; background:#f8fafc; border-radius:12px;">
+                        <div>
+                            <strong style="color:#2d3e4f;">@opp.Title</strong><br />
+                            <span style="font-size:0.8rem; color:#8e94a7;">
+                                @opp.Date.ToString("dd MMM yyyy")
+                            </span>
+                        </div>
+                        <span style="font-size:0.85rem; color:#2d7a2d; font-weight:600;">
+                            @activeCount volunteers active
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Quick Links -->
+    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <a asp-area="Organization" asp-controller="Opportunity" asp-action="Create"
+           class="btn-primary-action" style="text-decoration:none;">
+            <i class="bi bi-plus-lg"></i> New Opportunity
+        </a>
+        <a asp-area="Organization" asp-controller="Opportunity" asp-action="Index"
+           class="btn-view-details" style="width:auto; padding:0.75rem 1.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+            <i class="bi bi-list"></i> View All Opportunities
+        </a>
+    </div>
+</div>

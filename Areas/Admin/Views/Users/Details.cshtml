@@ -1,0 +1,119 @@
+﻿@* By ANGEL - admin side combined *@
+
+@model OpenHandsVolunteerPlatform.Models.Volunteer
+@using OpenHandsVolunteerPlatform.Models.Enums
+
+@{
+    ViewData["Title"] = "Volunteer Details";
+    var completed = Model.Applications?
+        .Where(a => a.Status == ApplicationStatus.Applied
+                 && a.Opportunity.Date < DateTime.Today).ToList() ?? new();
+    var upcoming = Model.Applications?
+        .Where(a => a.Status == ApplicationStatus.Applied
+                 && a.Opportunity.Date >= DateTime.Today).ToList() ?? new();
+}
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div class="container mt-4">
+
+    <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+       style="color:#8b92d1; text-decoration:none; font-size:0.9rem;">
+        <i class="bi bi-arrow-left"></i> Back to Users
+    </a>
+
+    <h1 style="font-size:2rem; font-weight:700; color:#3f4079; margin:1rem 0 0.25rem;">
+        @Model.Name
+    </h1>
+    <p style="color:#8e94a7; margin-bottom:2rem;">@Model.User?.Email</p>
+
+    <!-- Stats -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem;">
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
+            <div class="meta-label">TOTAL HOURS</div>
+            <div style="font-size:1.8rem; font-weight:700; color:#8b92d1;">@Model.TotalHours</div>
+        </div>
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
+            <div class="meta-label">COMPLETED</div>
+            <div style="font-size:1.8rem; font-weight:700; color:#2d7a2d;">@Model.CompletedCount</div>
+        </div>
+        <div class="meta-card" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
+            <div class="meta-label">CREDIT LEVEL</div>
+            @{
+                var creditColor = Model.CreditLevel.ToString() switch
+                {
+                    "High" => "#2d7a2d",
+                    "Growing" => "#b85e00",
+                    "Low" => "#e74c3c",
+                    _ => "#8e94a7"
+                };
+            }
+            <div style="font-size:1.8rem; font-weight:700; color:@creditColor;">
+                @Model.CreditLevel
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Info -->
+    <div class="info-card" style="margin-bottom:1.5rem;">
+        <h3 style="color:#3f4079; font-size:1rem; margin-bottom:1rem;">Profile Information</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">PHONE</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@Model.Phone</p>
+            </div>
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">AVAILABILITY</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@Model.Availability</p>
+            </div>
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">NO SHOWS</p>
+                <p style="font-weight:600; color:#e74c3c; margin:0;">@Model.NoShowCount</p>
+            </div>
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">JOINED</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">
+                    @Model.User?.CreatedAt.ToString("dd MMM yyyy")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="info-card">
+        <h3 style="color:#3f4079; font-size:1rem; margin-bottom:1rem;">
+            Activity History (@(completed.Count + upcoming.Count) total)
+        </h3>
+        @if (!completed.Any() && !upcoming.Any())
+        {
+            <p style="color:#8e94a7;">No applications yet.</p>
+        }
+        else
+        {
+            @foreach (var app in (completed.Concat(upcoming))
+                    .OrderByDescending(a => a.Opportunity.Date).Take(10))
+            {
+                <div style="display:flex; justify-content:space-between; align-items:center;
+                                    padding:0.75rem; background:#f8fafc; border-radius:12px;
+                                    margin-bottom:0.5rem;">
+                    <div>
+                        <strong style="color:#2d3e4f;">@app.Opportunity.Title</strong><br />
+                        <span style="font-size:0.8rem; color:#8e94a7;">
+                            @app.Opportunity.Date.ToString("dd MMM yyyy")
+                        </span>
+                    </div>
+                    <span style="font-size:0.75rem; font-weight:600; padding:0.2rem 0.75rem;
+                                         border-radius:50px;
+                                         background:@(app.Opportunity.Date < DateTime.Today ? "#f0f9f0" : "#fef3e7");
+                                         color:@(app.Opportunity.Date < DateTime.Today ? "#2d7a2d" : "#b85e00");">
+                        @(app.Opportunity.Date < DateTime.Today ? "Completed" : "Upcoming")
+                    </span>
+                </div>
+            }
+        }
+    </div>
+</div>

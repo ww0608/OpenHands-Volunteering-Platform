@@ -1,0 +1,361 @@
+﻿@model OpenHandsVolunteerPlatform.Models.Opportunity
+@* By ANGEL *@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Edit";
+}
+
+<!-- ww commented this out since we have include inside the Layout file globally-->
+@*
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["ErrorMessage"]
+    </div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+    </div>
+}
+*@
+
+<div class="container mt-4">
+    <div class="form-container">
+        <!-- Page Header -->
+        <div class="page-header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e9ecf3;">
+            <h1>Edit Opportunity</h1>
+            <p>Update the details below to modify this volunteer opportunity</p>
+        </div>
+
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input asp-for="OpportunityId" type="hidden" />
+            <input asp-for="OrganizationId" type="hidden" />
+            <input asp-for="Status" type="hidden" />
+
+            <!-- Basic Information Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-info-circle"></i> Basic Information</h4>
+                <div class="form-group">
+                    <label asp-for="Title">Event Title</label>
+                    <span class="required-star">*</span>
+                    <input asp-for="Title" class="form-control" placeholder="e.g., Beach Cleanup Day" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description">Description</label>
+                    <span class="required-star">*</span>
+                    <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe the volunteer opportunity..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Date & Time Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-calendar-event"></i> Date & Time</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Date">Event Date</label>
+                            <span class="required-star">*</span>
+                            <input asp-for="Date" type="date" class="form-control" style="max-width: 60%;" />
+                            <span asp-validation-for="Date" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ApplicationCloseDate">Application Close Date</label>
+                            <span class="required-star">*</span>
+                            <input asp-for="ApplicationCloseDate" type="date" class="form-control" style="max-width: 60%;" />
+                            <span asp-validation-for="ApplicationCloseDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="StartTime">Start Time</label>
+                            <span class="required-star">*</span>
+                            <input asp-for="StartTime" type="time" class="form-control" style="max-width: 60%;" />
+                            <span asp-validation-for="StartTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="EndTime">End Time</label>
+                            <span class="required-star">*</span>
+                            <input asp-for="EndTime" type="time" class="form-control" style="max-width: 60%;" />
+                            <span asp-validation-for="EndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-geo-alt"></i> Location</h4>
+                <div class="form-group">
+                    <label asp-for="Location">Address</label>
+                    <span class="required-star">*</span>
+                    <div class="input-group">
+                        <input type="text" id="address" asp-for="Location" class="form-control" placeholder="Enter full address" />
+                        <button type="button" class="btn-search" onclick="updateMap()">Search</button>
+                    </div>
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+                <div class="map-frame">
+                    <iframe id="map"
+                            src="https://www.google.com/maps?q=@Uri.EscapeDataString(Model.Location ?? "default")&output=embed"
+                            width="100%"
+                            height="300"
+                            style="border:0; margin-top:10px;"
+                            allowfullscreen
+                            loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Capacity & Settings Card -->
+            <div class="form-card">
+                <h4><i class="bi bi-people"></i> Capacity & Settings</h4>
+                <div class="form-group">
+                    <label asp-for="VolunteersNeeded">Volunteers Needed</label>
+                    <span class="required-star">*</span>
+                    <input asp-for="VolunteersNeeded" type="number" min="1" class="form-control" style="max-width: 200px;" placeholder="e.g., 10" />
+                    <span asp-validation-for="VolunteersNeeded" class="text-danger"></span>
+                </div>
+
+                @* By WW *@
+                <!-- Emergency Mode -->
+                <div class="emergency-box">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="IsEmergency" name="IsEmergency" value="true" @(Model.IsEmergency ? "checked" : "")>
+                        <label class="form-check-label fw-bold" for="IsEmergency">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Emergency Mode
+                        </label>
+                    </div>
+                    <small class="text-muted d-block mt-1">Emergency opportunities appear with red URGENT badge and are pinned to top</small>
+                    <input type="hidden" name="IsEmergency" value="false">
+
+                    <!-- Credit Level Selection (shows when Emergency Mode is checked) -->
+                    <div id="creditLevelDiv" style="display: @(Model.IsEmergency ? "block" : "none");" class="credit-select">
+                        <label class="form-label fw-bold">Minimum Credit Score Required</label>
+                        <select name="MinimumCreditLevel" class="form-select" style="max-width: 350px;">
+                            <option value="">Select minimum credit level</option>
+                            <option value="3">Core Only (High Credit)</option>
+                            <option value="2">Growing and Above (Average Credit)</option>
+                            <option value="1">All Volunteers (Including Low Credit)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a asp-action="Details" asp-route-id="@Model.OpportunityId" asp-route-status="@ViewBag.ReturnStatus" class="btn-back"><i class="bi bi-arrow-left"></i>Back to Details</a>
+                <button type="submit" name="action" value="Update" class="btn-save">
+                    <i class="bi bi-check-lg"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function updateMap() {
+            const addr = document.getElementById('address').value;
+            if(addr.trim() === "") return;
+
+            document.getElementById('map').src =
+                `https://www.google.com/maps?q=${encodeURIComponent(addr)}&output=embed`;
+        }
+
+        // By WW
+        // Show/hide credit level div when emergency checkbox changes
+        const emergencyCheckbox = document.getElementById('IsEmergency');
+        if (emergencyCheckbox) {
+            emergencyCheckbox.addEventListener('change', function() {
+                const creditDiv = document.getElementById('creditLevelDiv');
+                if (creditDiv) creditDiv.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+    </script>
+}
+
+@* ww fix *@
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #edf2f9;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .form-card h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #3f4079;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f0f2ff;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2d3e4f;
+        margin-bottom: 0.35rem;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .required-star {
+        color: #ef4444;
+        margin-left: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #8b92d1;
+        box-shadow: 0 0 0 3px rgba(139,146,209,0.1);
+    }
+
+    .input-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .input-group .form-control {
+        flex: 1;
+    }
+
+    .btn-search {
+        padding: 0.6rem 1.25rem;
+        background: #8b92d1;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-search:hover {
+        background: #7a82c5;
+    }
+
+    .map-frame {
+        margin-top: 0.75rem;
+    }
+
+    .map-frame iframe {
+        width: 100%;
+        height: 220px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .emergency-box {
+        background: #fff5f5;
+        border: 1px solid #fecaca;
+        border-radius: 16px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .emergency-box .form-check-label {
+        color: #b91c1c;
+    }
+
+    .credit-select {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #fee2e2;
+    }
+
+    .btn-save {
+        background: #8b92d1;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+        background: #7a82c5;
+        transform: translateY(-1px);
+    }
+
+    .btn-back {
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .btn-back:hover {
+        color: #3f4079;
+        text-decoration: underline;
+    }
+
+    .text-danger {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #3f4079;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-header p {
+        color: #8e94a7;
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0;
+        padding-top: 1.5rem;
+    }
+</style>

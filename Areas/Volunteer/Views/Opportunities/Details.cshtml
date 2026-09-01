@@ -1,0 +1,270 @@
+﻿@model OpenHandsVolunteerPlatform.ViewModels.OpportunityViewModel
+@* By ANGEL *@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    ViewBag.Title = Model.Opportunity.Title;
+
+    // Calculate spots left
+    // int spotsLeft = Model.VolunteersNeeded - (Model.Applications?.Count(a => a.Status == ApplicationStatus.Applied) ?? 0);
+
+    //By WW
+    // Get volunteer credit level from ViewBag
+    var volunteerCreditLevel = ViewBag.VolunteerCreditLevel;
+
+}
+
+<link rel="stylesheet" href="~/css/volunteerPage.css" asp-append-version="true" />
+
+
+<!-- Main Content -->
+<div class="main-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="@Url.Action("Index")">Opportunities</a>
+        <i class="bi bi-chevron-right"></i>
+        <span>@Model.Opportunity.Title</span>
+    </div>
+
+    <!-- Opportunity Header -->
+    <div class="opportunity-header">
+        <div class="title-section">
+            <div class="title-row">
+                <h1 class="opportunity-title">@Model.Opportunity.Title</h1>
+                <span class="status-badge @Model.StatusClass">
+                    @Model.TimeStatus
+                </span>
+            </div>
+            <div class="location">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>@Model.Opportunity.Location</span>
+            </div>
+        </div>
+        <div class="action-buttons">
+            @if (ViewBag.HasApplied == true)
+            {
+                <button disabled style="border:none; background-color: lightgray; color: white; font-weight: 600; font-size: 0.9rem; padding: 0.75rem 1.75rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem;cursor:not-allowed;">
+                    APPLIED
+                </button>
+            }
+            //By WW
+            else if (Model.Opportunity.IsEmergency && Model.Opportunity.MinimumCreditLevel.HasValue && ViewBag.VolunteerCreditLevel != null)
+            {
+                int volunteerLevel = (int)ViewBag.VolunteerCreditLevel;
+                int requiredLevel = (int)Model.Opportunity.MinimumCreditLevel.Value;
+
+                if (volunteerLevel < requiredLevel)
+                {
+                    <button disabled style="border:none; background-color: #fef3c7; color: #92400e; font-weight: 600; font-size: 0.9rem; padding: 0.75rem 1.75rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; cursor: not-allowed;">
+                        <i class="bi bi-exclamation-triangle"></i> INSUFFICIENT CREDIT
+                    </button>
+                }
+                else
+                {
+                    <a asp-area="Volunteer"
+                        asp-controller="Application"
+                        asp-action="Apply"
+                        asp-route-id="@Model.Opportunity.OpportunityId"
+                        class="btn-primary-action"
+                        style="text-decoration:none;">
+                        APPLY
+                    </a>
+                }
+            }
+            else
+            {
+                <a asp-area="Volunteer"
+                    asp-controller="Application"
+                    asp-action="Apply"
+                    asp-route-id="@Model.Opportunity.OpportunityId"
+                    class="btn-primary-action"
+                    style="text-decoration:none;">
+                    APPLY
+                </a>
+            }
+        </div>
+	</div>
+
+    <!-- Meta Information Cards -->
+    <div class="meta-grid">
+        <div class="meta-card">
+            <div class="meta-icon">
+                <i class="bi bi-calendar3"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">DATE</span>
+                <span class="meta-value">@Model.Opportunity.Date.ToString("dd MMMM yyyy")</span>
+            </div>
+        </div>
+
+        <div class="meta-card">
+            <div class="meta-icon">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">TIME</span>
+                <span class="meta-value">@Model.Opportunity.StartTime.ToString(@"hh\:mm") - @Model.Opportunity.EndTime.ToString(@"hh\:mm")</span>
+            </div>
+        </div>
+
+        <div class="meta-card">
+            <div class="meta-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">VOLUNTEERS</span>
+                <span class="meta-value"> @(Model.Opportunity.Applications?.Count(a => a.Status == ApplicationStatus.Applied) ?? 0) / @Model.Opportunity.VolunteersNeeded </span>
+            </div>
+        </div>
+
+        <div class="meta-card">
+            <div class="meta-icon" style="color:indianred; background-color:mistyrose">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <div class="meta-content">
+                <span class="meta-label">APPLICATION CLOSE DATE</span>
+                <span class="meta-value">@Model.Opportunity.ApplicationCloseDate.ToString("dd MMMM yyyy")</span>
+            </div>
+        </div>
+    </div>
+
+    @* By WW *@
+    <!-- Show if emergency opportunity is full -->
+    @if (Model.Opportunity.IsEmergency && TempData["ErrorMessage"] != null && TempData["ErrorMessage"].ToString().Contains("full"))
+    {
+        <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>@TempData["ErrorMessage"]</strong>
+        </div>
+    }
+
+    <!-- EMERGENCY CREDIT CHECK SECTION -->
+    @if (Model.Opportunity.IsEmergency && Model.Opportunity.MinimumCreditLevel.HasValue && volunteerCreditLevel != null)
+    {
+        int volunteerLevel = (int)volunteerCreditLevel;
+        int requiredLevel = (int)Model.Opportunity.MinimumCreditLevel.Value;
+        string requiredLevelText = requiredLevel == 3 ? "HIGH" : "AVERAGE";
+
+        if (volunteerLevel < requiredLevel)
+        {
+            <div class="alert-warning" style="margin-bottom: 1.5rem;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong>Credit Requirement:</strong> This emergency opportunity requires <strong>@requiredLevelText</strong> credit level.
+                Your current credit level is <strong>@(volunteerLevel == 3 ? "HIGH" : volunteerLevel == 2 ? "AVERAGE" : "LOW")</strong>.
+                Complete more events to improve your credit score!
+            </div>
+        }
+        else
+        {
+            <div class="alert-info" style="margin-bottom: 1.5rem;">
+                <i class="bi bi-info-circle-fill"></i>
+                <strong>Emergency Opportunity:</strong> This opportunity requires <strong>@requiredLevelText</strong> credit level. You meet the requirement!
+            </div>
+        }
+    }
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+        
+        <!-- Left Column: Description -->
+        <div>
+            <div class="description-card">
+                <h2 class="section-title">Description</h2>
+                <p class="description-text">@Model.Opportunity.Description</p>
+            </div>
+            <div class="description-card">
+                <h2 class="section-title">Location Map</h2>
+                <iframe id="map"
+                        src="https://www.google.com/maps?q=@Uri.EscapeDataString(Model.Opportunity.Location ?? "default")&output=embed"
+                        width="100%"
+                        height="300"
+                        style="border:0; margin-top:10px;"
+                        allowfullscreen
+                        loading="lazy">
+                </iframe>
+            </div>
+		</div>
+
+        <!-- Right Column: Organization Info Card-->
+        <div class="info-sidebar">
+            <div class="info-card">
+                <h2 class="section-title">Organization</h2>
+                <a asp-area="Volunteer" asp-controller="Organizations" asp-action="Profile"
+				   asp-route-id="@Model.Opportunity.Organization.OrganizationId" style="text-decoration: none;">
+                    <h3 class="info-card-title">
+                    @* <i class="bi bi-building"></i> *@
+                    @(Model.Opportunity.Organization?.OrganizationName ?? "-")
+					</h3>
+				</a>
+                <div class="org-details">
+                    @* <span class="org-name">@(Model.Opportunity.Organization?.OrganizationName ?? "-")</span> *@
+                    <div class="org-contact">
+                        <i class="bi bi-envelope"></i>
+                        <span>@(Model.Opportunity.Organization?.User?.Email ?? "-")</span>
+                    </div>
+                    <div class="org-contact">
+                        <i class="bi bi-telephone"></i>
+                        <span>@(Model.Opportunity.Organization?.Phone ?? "-")</span>
+                    </div>
+
+                    @* By ANGEL *@
+                    @if (User.IsInRole("Volunteer"))
+                    {
+                        <hr style="margin: 1rem 0;" />
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="font-size:0.85rem; color:gray;">
+                                <i class="bi bi-people"></i> @ViewBag.FollowerCount followers
+                            </span>
+                            @if (ViewBag.IsFollowing == true)
+                            {
+                                <form method="post" asp-area="Volunteer" asp-controller="Opportunities" asp-action="Unfollow">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="organizationId" value="@Model.Opportunity.Organization.OrganizationId" />
+                                    <input type="hidden" name="opportunityId" value="@Model.Opportunity.OpportunityId" />
+                                    <button type="submit" class="btn btn-sm btn-secondary">Unfollow</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" asp-area="Volunteer" asp-controller="Opportunities" asp-action="Follow">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="organizationId" value="@Model.Opportunity.Organization.OrganizationId" />
+                                    <input type="hidden" name="opportunityId" value="@Model.Opportunity.OpportunityId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Follow</button>
+                                </form>
+                            }
+                        </div>
+
+                        <div style="margin-top:1rem;">
+                            <a asp-area="Volunteer" asp-controller="Report" asp-action="ReportOpportunity"
+                                asp-route-id="@Model.Opportunity.OpportunityId"
+                                style="font-size:0.8rem; color:#e74c3c; text-decoration:none;">
+                                <i class="bi bi-flag"></i> Report this opportunity
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+@section Scripts {
+    <script>
+        function updateMap() {
+            const addr = document.getElementById('address').value;
+            if(addr.trim() === "") return;
+
+            document.getElementById('map').src =
+                `https://www.google.com/maps?q=${encodeURIComponent(addr)}&output=embed`;
+        }
+    </script>
+}
+
+

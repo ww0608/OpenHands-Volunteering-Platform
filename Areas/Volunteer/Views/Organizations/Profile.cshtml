@@ -1,0 +1,197 @@
+﻿@* By ANGEL *@
+
+@model OpenHandsVolunteerPlatform.Models.Organization
+@using OpenHandsVolunteerPlatform.Models.Enums
+
+@{
+    ViewData["Title"] = Model.OrganizationName;
+    bool isFollowing = ViewBag.IsFollowing == true;
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/volunteerPage.css" asp-append-version="true" />
+
+<div class="main-container">
+    <!-- ww fix -->
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="@Url.Action("Index", "Organizations")">Organizations</a>
+        <i class="bi bi-chevron-right"></i>
+        <span>@Model.OrganizationName</span>
+    </div>
+
+    <!-- Org Header Card -->
+    <div class="info-card" style="display:flex; align-items:flex-start; gap:1.5rem; margin-bottom:1.5rem;">
+        @if (!string.IsNullOrEmpty(Model.LogoPath))
+        {
+            <img src="@Url.Content("~" + Model.LogoPath)"
+                 style="width:80px; height:80px; border-radius:50%; object-fit:cover; flex-shrink:0;" />
+        }
+        else
+        {
+            <div style="width:80px; height:80px; border-radius:50%; background:#f0f2ff;
+                            display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <i class="bi bi-building" style="font-size:2rem; color:#8b92d1;"></i>
+            </div>
+        }
+        <div style="flex:1;">
+            <h1 style="font-size:1.5rem; font-weight:700; color:#2d3e4f; margin:0 0 0.25rem;">
+                @Model.OrganizationName.ToUpper()
+            </h1>
+            <p style="color:#8e94a7; font-size:0.9rem; margin:0 0 0.5rem;">
+                @(Model.Mission ?? "No mission statement provided.")
+            </p>
+            <div style="display:flex; align-items:center; gap:0.5rem; color:#8e94a7; font-size:0.85rem;">
+                <i class="bi bi-geo-alt"></i>
+                <span>Penang, Malaysia</span>
+            </div>
+        </div>
+        <!-- Edit icon placeholder for org owner (not shown to volunteers) -->
+    </div>
+
+    <!-- Details Card -->
+    <div class="info-card" style="margin-bottom:1.5rem;">
+        <div style="margin-bottom:1rem;">
+            <p style="font-weight:700; color:#2d3e4f; margin:0 0 0.25rem;">Mission Statement</p>
+            <p style="color:#4b5563; margin:0;">@(Model.Mission ?? "-")</p>
+        </div>
+        <div style="margin-bottom:1rem;">
+            <p style="font-weight:700; color:#2d3e4f; margin:0 0 0.25rem;">Email Address</p>
+            <p style="color:#8b92d1; margin:0;">@(Model.User?.Email ?? "-")</p>
+        </div>
+        <div style="margin-bottom:1rem;">
+            <p style="font-weight:700; color:#2d3e4f; margin:0 0 0.25rem;">Phone Number</p>
+            <p style="color:#4b5563; margin:0;">@(Model.Phone ?? "-")</p>
+        </div>
+
+        <!-- Followers + Rating -->
+        <div style="display:flex; gap:2rem; margin-bottom:1rem;">
+            <div>
+                <p style="font-weight:700; color:#2d3e4f; margin:0 0 0.25rem;">Followers</p>
+                <p style="color:#8b92d1; font-size:1.1rem; font-weight:600; margin:0;">
+                    @ViewBag.FollowerCount
+                </p>
+            </div>
+            <div>
+                <p style="font-weight:700; color:#2d3e4f; margin:0 0 0.25rem;">Rating</p>
+                <p style="color:#f0a500; font-size:1.1rem; font-weight:600; margin:0;">
+                    @if (ViewBag.RatingCount > 0)
+                    {
+                        for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="bi @(i <= (int)ViewBag.AverageRating ? "bi-star-fill" : "bi-star")"
+                               style="font-size:0.9rem;"></i>
+                        }
+                        <span style="font-size:0.85rem; color:#8e94a7; margin-left:0.25rem;">
+                            (@ViewBag.AverageRating / @ViewBag.RatingCount reviews)
+                        </span>
+                    }
+                    else
+                    {
+                        <span style="font-size:0.85rem; color:#8e94a7;">No ratings yet</span>
+                    }
+                </p>
+            </div>
+        </div>
+
+        <!-- Follow / Unfollow -->
+        @if (User.IsInRole("Volunteer"))
+        {
+            <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                @if (isFollowing)
+                {
+                    <form method="post" asp-area="Volunteer" asp-controller="Opportunities"
+                          asp-action="UnfollowFromProfile">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="organizationId" value="@Model.OrganizationId" />
+                        <button type="submit" class="btn-primary-action"
+                                style="background:#e2e8f0; color:#3f4079;">
+                            Unfollow
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <form method="post" asp-area="Volunteer" asp-controller="Opportunities"
+                          asp-action="FollowFromProfile">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="organizationId" value="@Model.OrganizationId" />
+                        <button type="submit" class="btn-primary-action">
+                            ☆ Follow
+                        </button>
+                    </form>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Opportunities -->
+    <h2 style="font-size:1.1rem; font-weight:700; color:#3f4079; text-transform:uppercase;
+               letter-spacing:0.5px; margin-bottom:1rem;">
+        Opportunities
+    </h2>
+
+    @if (!Model.Opportunities.Any())
+    {
+        <div class="description-card" style="text-align:center; padding:2rem; color:#8e94a7;">
+            No opportunities posted yet.
+        </div>
+    }
+    else
+    {
+        @foreach (var opp in Model.Opportunities.OrderByDescending(o => o.Date).Take(5))
+        {
+            var statusText = opp.Date.Date > DateTime.Today ? "Open" : "Close";
+            var statusColor = opp.Date.Date > DateTime.Today ? "#2d7a2d" : "#e74c3c";
+            var statusBg = opp.Date.Date > DateTime.Today ? "#f0f9f0" : "#fef0f0";
+
+            <div class="description-card" style="margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="flex:1;">
+                        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.5rem;">
+                            <h3 style="font-size:1.1rem; font-weight:700; color:#2d3e4f; margin:0;">
+                                @opp.Title
+                            </h3>
+                            <span style="background:@statusBg; color:@statusColor; padding:0.2rem 0.75rem;
+                                                 border-radius:50px; font-size:0.75rem; font-weight:600;">
+                                @statusText
+                            </span>
+                        </div>
+                        <p style="color:#8e94a7; font-size:0.85rem; margin:0 0 0.5rem;">
+                            <i class="bi bi-geo-alt"></i> @opp.Location
+                            &nbsp;·&nbsp;
+                            <i class="bi bi-calendar3"></i> @opp.Date.ToString("dd MMMM yyyy")
+                        </p>
+                        <p style="color:#4b5563; font-size:0.9rem; margin:0;">
+                            @(opp.Description?.Length > 120
+                                                ? opp.Description.Substring(0, 120) + "..."
+                                                : opp.Description)
+                </p>
+            </div>
+        </div>
+        <div style="margin-top:1rem;">
+            <a asp-area="Volunteer" asp-controller="Opportunities" asp-action="Details"
+               asp-route-id="@opp.OpportunityId"
+               class="btn-view-details" style="width:auto; padding:0.5rem 1.25rem;
+                                                       display:inline-block; text-align:center;">
+                View All
+            </a>
+        </div>
+    </div>
+        }
+    }
+
+    <!-- Report Organization -->
+    @if (User.IsInRole("Volunteer"))
+    {
+        <div style="margin-top:1.5rem;">
+            <a asp-area="Volunteer" asp-controller="Report" asp-action="ReportOrganization"
+               asp-route-id="@Model.OrganizationId"
+               style="background:#f0f2ff; color:#8e94a7; border:1px solid #e2e8f0;
+                          padding:0.6rem 1.25rem; border-radius:50px; text-decoration:none;
+                          font-size:0.85rem; display:inline-flex; align-items:center; gap:0.5rem;">
+                <i class="bi bi-flag"></i> REPORT ORGANIZATION
+            </a>
+        </div>
+    }
+</div>

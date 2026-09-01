@@ -1,0 +1,214 @@
+﻿@model OpenHandsVolunteerPlatform.ViewModels.OrgProfileViewModels
+@using OpenHandsVolunteerPlatform.Models.Enums
+
+@{
+    ViewData["Title"] = "Organization Profile";
+}
+
+<!-- Link to external CSS -->
+<link rel="stylesheet" href="~/css/OrgProfile.css" asp-append-version="true" />
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+    <div class="main-container">
+        @* <!-- Alert Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i> @TempData["ErrorMessage"]
+            </div>
+        } *@
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-logo">
+                @if (!string.IsNullOrEmpty(Model.LogoPath))
+                {
+                    <img src="@Model.LogoPath" alt="@Model.OrganizationName">
+                }
+                else
+                {
+                    <i class="bi bi-building"></i>
+                }
+            </div>
+
+            <div class="profile-title">
+                <h1>@Model.OrganizationName</h1>
+
+                <div class="profile-location">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Penang, Malaysia</span>
+                </div>
+
+                <!-- ww fix -->
+                <div class="profile-badges" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                    <!-- Organization Type Badge -->
+                    @if (!string.IsNullOrEmpty(Model.OrganizationType))
+                    {
+                        <span class="verification-badge" style="background: #e0e4ff; color: #3f4079;">
+                            <i class="bi bi-building"></i> @Model.OrganizationType
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="verification-badge" style="background: #fef3c7; color: #92400e;">
+                            <i class="bi bi-exclamation-triangle"></i> Organization Type Not Set
+                            <a href="@Url.Action("Edit")" style="color: #92400e;">Set Now</a>
+                        </span>
+                    }
+
+                    <!--Verification Badge-->
+                    @if (Model.VerificationStatus == VerificationStatus.Approved)
+                    {
+                        <span class="verification-badge badge-approved">
+                            <i class="bi bi-check-circle-fill"></i> Verified
+                        </span>
+                    }
+                    else if (Model.VerificationStatus == VerificationStatus.Pending)
+                    {
+                        <span class="verification-badge badge-pending">
+                            <i class="bi bi-clock-history"></i> Verification Pending
+                        </span>
+                    }
+                    else if (Model.VerificationStatus == VerificationStatus.Rejected)
+                    {
+                        <span class="verification-badge badge-rejected">
+                            <i class="bi bi-x-circle-fill"></i> Verification Rejected
+                        </span>
+                    }
+                </div>
+            </div>
+            <!-- Edit Button on the Right Side -->
+            <div style="margin-left: auto;">
+                <a href="@Url.Action("Edit")" class="btn-edit-profile" style="background-color: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); border-radius: 50px; padding: 0.6rem 1.5rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;">
+                    <i class="bi bi-pencil-square"></i> Edit Profile
+                </a>
+            </div>
+        </div>
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">@Model.TotalOpportunities</div>
+                <div class="stat-label">Total Opportunities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@Model.UpcomingOpportunities</div>
+                <div class="stat-label">Upcoming</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@Model.CompletedOpportunities</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@Model.TotalVolunteers</div>
+                <div class="stat-label">Volunteers</div>
+            </div>
+        </div>
+
+        <!-- Mission Statement -->
+        <div class="mission-card">
+            <div class="info-card-title">
+                <i class="bi bi-megaphone"></i> Mission Statement
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Mission))
+            {
+                <div class="mission-text">
+                    @Model.Mission
+                </div>
+            }
+            else
+            {
+                <div class="empty-mission">
+                    No mission statement provided yet.
+                </div>
+            }
+        </div>
+
+        <!-- Contact Information -->
+        <div class="info-grid">
+            <!-- Email -->
+            <div class="info-card">
+                <div class="info-card-title">
+                    <i class="bi bi-envelope"></i> Email Address
+                </div>
+                <div class="info-value" style="font-size: 1.1rem; padding: 0.5rem 0;">
+                    @Model.Email
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="info-card">
+                <div class="info-card-title">
+                    <i class="bi bi-telephone"></i> Phone Number
+                </div>
+                <div class="info-value" style="font-size: 1.1rem; padding: 0.5rem 0;">
+                    @Model.Phone
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Uploaded -->
+        @if (!string.IsNullOrEmpty(Model.VerificationDocumentPath))
+        {
+            <div class="document-card">
+                <div class="info-card-title">
+                    <i class="bi bi-file-earmark-text"></i> Document Uploaded
+                </div>
+
+                <div class="document-item">
+                    <div class="document-icon">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+                    <div class="document-info">
+                        <div class="document-name">Verification Document</div>
+                        <div class="document-meta">
+                            Uploaded on @(Model.VerifiedAt?.ToString("dd MMMM yyyy") ?? Model.CreatedAt.ToString("dd MMMM yyyy"))
+                        </div>
+                    </div>
+                    <a href="@Model.VerificationDocumentPath" target="_blank" class="document-download">
+                        <i class="bi bi-download"></i> View
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="document-card">
+                <div class="info-card-title">
+                    <i class="bi bi-file-earmark-text"></i> Document Uploaded
+                </div>
+                <div class="empty-mission">
+                    No verification document uploaded yet.
+                </div>
+            </div>
+        }
+
+        <!-- Member Since (hidden in design but useful) -->
+        <div style="margin-top: 2rem; text-align: center; color: #8e94a7; font-size: 0.9rem;">
+            <i class="bi bi-calendar3"></i> Member since @Model.CreatedAt.ToString("MMMM yyyy")
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

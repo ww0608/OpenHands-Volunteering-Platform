@@ -1,0 +1,168 @@
+﻿@* By ANGEL - admin side combined *@
+
+@using OpenHandsVolunteerPlatform.Models.Enums
+@model OpenHandsVolunteerPlatform.Models.Organization
+
+@{
+    ViewData["Title"] = "Review Organization";
+}
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div class="container mt-4">
+
+    <a asp-area="Admin" asp-controller="Organization" asp-action="VerificationQueue"
+       style="color:#8b92d1; text-decoration:none; font-size:0.9rem;">
+        <i class="bi bi-arrow-left"></i> Back to Verification Queue
+    </a>
+
+    <h1 style="font-size:2rem; font-weight:700; color:#3f4079; margin:1rem 0 0.25rem;">
+        Review Organization
+    </h1>
+
+    @* @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mt-2">@TempData["SuccessMessage"]</div>
+    } *@
+
+    <!-- Org Details -->
+    <div style="background:white; border-radius:24px; padding:2rem;
+                border:1px solid #edf2f9; margin:1.5rem 0;">
+        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+            @if (!string.IsNullOrEmpty(Model.LogoPath))
+            {
+                <img src="@Url.Content("~" + Model.LogoPath)"
+                     style="width:64px; height:64px; border-radius:50%; object-fit:cover;" />
+            }
+            else
+            {
+                <div style="width:64px; height:64px; background:#f0f2ff; border-radius:50%;
+                                display:flex; align-items:center; justify-content:center;">
+                    <i class="bi bi-building" style="font-size:1.8rem; color:#8b92d1;"></i>
+                </div>
+            }
+            <div>
+                <h2 style="margin:0; color:#2d3e4f;">@Model.OrganizationName</h2>
+                <span style="color:#8e94a7; font-size:0.9rem;">@Model.User?.Email</span>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">PHONE</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@Model.Phone</p>
+            </div>
+            <div>
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">SUBMITTED</p>
+                <p style="font-weight:600; color:#2d3e4f; margin:0;">@Model.CreatedAt.ToString("dd MMM yyyy")</p>
+            </div>
+            <div style="grid-column:1/-1;">
+                <p style="color:#8e94a7; font-size:0.8rem; margin:0;">MISSION STATEMENT</p>
+                <p style="color:#4b5563; margin:0;">@(Model.Mission ?? "-")</p>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.VerificationDocumentPath))
+            {
+                <div style="grid-column:1/-1;">
+                    <p style="color:#8e94a7; font-size:0.8rem; margin:0;">REGISTRATION DOCUMENT</p>
+                    <a asp-area="Admin" asp-controller="Organization" asp-action="ViewDocument" asp-route-id="@Model.OrganizationId" target="_blank"
+                       style="color:#8b92d1; text-decoration:none;">
+                        <i class="bi bi-file-earmark-pdf"></i> View Document
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.VerificationStatus == VerificationStatus.Pending)
+    {
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:end">
+        <!-- Approve -->
+        <div style="background:white; border-radius:24px; padding:1.5rem; margin-bottom:1rem;">
+            <form method="post" asp-action="Verify">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.OrganizationId" />
+                <input type="hidden" name="approve" value="true" />
+                <button type="submit"
+                        style="background:#2d7a2d; color:white; border:none; padding:0.75rem 1.5rem;
+                                   border-radius:12px; font-weight:600">
+                    <i class="bi bi-check-lg"></i> Approve Organization
+                </button>
+            </form>
+        </div>
+
+        <!-- Reject -->
+			<div style="background:white; border-radius:24px; padding:1.5rem; margin-bottom:1rem;">
+            @* <form method="post" asp-action="Verify"> *@
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.OrganizationId" />
+                <input type="hidden" name="approve" value="false" />
+                @* <textarea name="reason" rows="3" placeholder="Reason for rejection..."
+                      style="width:100%; padding:0.75rem; border:1px solid #e2e8f0;
+                                 border-radius:12px; margin-bottom:1rem; font-size:0.9rem;"></textarea> *@
+                <button onclick="openRejectModal()"
+                        style="background:#e74c3c; color:white; border:none; padding:0.75rem 1.5rem;
+                                   border-radius:12px; font-weight:600">
+                    <i class="bi bi-x-lg"></i> Reject Organization
+                </button>
+            @* </form> *@
+        </div>
+        </div>
+    }
+    else
+    {
+        <div style="background:white; border-radius:24px; padding:2rem; border:1px solid #edf2f9;">
+            <p style="color:#8e94a7; margin:0;">
+                This organization has been
+                <strong>@Model.VerificationStatus.ToString().ToLower()</strong>
+                @if (Model.VerifiedAt.HasValue)
+                {
+                    <span>on @Model.VerifiedAt.Value.ToString("dd MMM yyyy")</span>
+                }
+            </p>
+            @if (!string.IsNullOrEmpty(Model.RejectionReason))
+            {
+                <p style="margin-top:0.5rem; color:#4b5563;">
+                    <strong>Reason:</strong> @Model.RejectionReason
+                </p>
+            }
+        </div>
+    }
+</div>
+
+<!-- Reject Reason Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="Verify">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.OrganizationId" />
+                <input type="hidden" name="approve" value="false" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject Organization</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-bold">Reason for rejection</label>
+                    <textarea name="reason" class="form-control" rows="3"
+                              placeholder="Please provide a reason..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+    function openRejectModal() {
+        var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        modal.show();
+    }
+</script>

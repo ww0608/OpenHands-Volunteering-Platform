@@ -1,0 +1,121 @@
+﻿@model List<OpenHandsVolunteerPlatform.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+
+    var filter = Context.Request.Query["filter"].ToString();
+    if (string.IsNullOrEmpty(filter)) filter = "all";
+
+    var filteredNotifs = filter == "unread"
+        ? Model.Where(n => !n.IsRead).ToList()
+        : Model;
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div class="container-custom" style="max-width:900px; margin:2rem auto; padding:0 2rem;">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h1 class="page-title" style="margin:0;">Notifications</h1>
+
+        @if (Model.Any(n => !n.IsRead))
+        {
+            <form method="post" asp-action="MarkAllRead">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-new-opportunity">
+                    <i class="bi bi-check-all"></i> Mark all as read
+                </button>
+            </form>
+        }
+    </div>
+
+    <!-- Filter Tabs -->
+    <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem;">
+        <a href="?filter=all"
+           style="padding:0.4rem 1rem; border-radius:50px;
+                  background:@(filter == "all" ? "#8b92d1" : "white");
+                  color:@(filter == "all" ? "white" : "#64748b");
+                  border:1px solid #e2e8f0; text-decoration:none;">
+            All (@Model.Count)
+        </a>
+
+        <a href="?filter=unread"
+           style="padding:0.4rem 1rem; border-radius:50px;
+                  background:@(filter == "unread" ? "#8b92d1" : "white");
+                  color:@(filter == "unread" ? "white" : "#64748b");
+                  border:1px solid #e2e8f0; text-decoration:none;">
+            Unread (@Model.Count(n => !n.IsRead))
+        </a>
+    </div>
+
+    <!-- Empty -->
+    @if (!filteredNotifs.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-bell-slash"></i>
+            <h3>No notifications</h3>
+            <p>You're all caught up!</p>
+        </div>
+    }
+    else
+    {
+        <div style="display:flex; flex-direction:column; gap:1rem;">
+            @foreach (var n in filteredNotifs)
+            {
+                var isClickable = n.Type == NotificationType.NewOpportunity && !string.IsNullOrEmpty(n.RelatedId);
+
+                <div onclick="handleClick('@n.NotificationId', '@n.RelatedId', @isClickable.ToString().ToLower())"
+                     style="background:@(n.IsRead ? "white" : "#f5f7ff");
+                                            border-radius:16px;
+                                            padding:1.25rem 1.5rem;
+                                            border:1px solid @(n.IsRead ? "#edf2f9" : "#d8ddff");
+                                            display:flex;
+                                            justify-content:space-between;
+                                            align-items:center;
+                                            cursor:@(isClickable ? "pointer" : "default");">
+
+                    <div style="display:flex; gap:1rem;">
+                        <i class="bi bi-bell"></i>
+
+                        <div>
+                            <p style="margin:0; font-weight:@(n.IsRead ? "400" : "600");">
+                                @n.Message
+                            </p>
+                            <span style="font-size:0.8rem; color:#8e94a7;">
+                                @n.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")
+                            </span>
+                        </div>
+                    </div>
+
+                    @if (!n.IsRead)
+                    {
+                        <form method="post" asp-action="MarkRead">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="notificationId" value="@n.NotificationId" />
+                            <button type="submit" class="btn-view-details" style="width:50px">
+                                <i class="bi bi-check-all"></i>
+                            </button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function handleClick(id, relatedId, isClickable) {
+            if (!isClickable) return;
+
+            fetch('/Organization/Notifications/MarkRead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `notificationId=${id}`
+            }).then(() => {
+                window.location.href = '/Organization/Opportunity/Details/' + relatedId;
+            });
+        }
+    </script>
+}

@@ -1,0 +1,136 @@
+﻿@* By ANGEL - admin side combined *@
+
+@using OpenHandsVolunteerPlatform.Models.Enums
+@model List<OpenHandsVolunteerPlatform.Models.Report>
+
+@{
+    ViewData["Title"] = "Report Moderation";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<!-- ww fix -->
+<link rel="stylesheet" href="~/css/AdminPage.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <!-- ww fix -->
+    <h1 class="page-title">Report Moderation</h1>
+    <p class="page-subtitle">Review and action flagged content.</p>
+
+
+    @* @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    } *@
+
+    <!-- Search -->
+    <div class="action-bar">
+        <div class="search-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput" oninput="filterRows()"
+                   placeholder="Search reports..." />
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div style="background:white; border-radius:24px; border:1px solid #edf2f9; overflow:hidden;">
+        <table class="table" style="margin:0;">
+            <thead style="background:#f5f7ff;">
+                <tr>
+                    <th style="padding:1rem 1.5rem; color:#3f4079; font-weight:600; border:none;">Target</th>
+                    <th style="padding:1rem; color:#3f4079; font-weight:600; border:none;">Type</th>
+                    <th style="padding:1rem; color:#3f4079; font-weight:600; border:none;">Reason</th>
+                    <th style="padding:1rem; color:#3f4079; font-weight:600; border:none;">Submitted</th>
+                    <th style="padding:1rem; color:#3f4079; font-weight:600; border:none;">Status</th>
+                    <th style="padding:1rem; color:#3f4079; font-weight:600; border:none;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="reportTable">
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:3rem; color:#8e94a7;">
+                            <i class="bi bi-check-circle" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i>
+                            No reports found
+                        </td>
+                    </tr>
+                }
+                @foreach (var r in Model)
+                {
+                    <tr class="report-row" style="border-top:1px solid #f5f5f5;">
+                        <td style="padding:1rem 1.5rem; vertical-align:middle;">
+                            <span style="font-size:0.8rem; color:#8e94a7;">@r.TargetType</span><br />
+                            <span style="font-weight:600; color:#2d3e4f; font-size:0.9rem;">
+                                @(((Dictionary<string, string>)ViewBag.TargetNames).GetValueOrDefault(r.TargetId, "-"))
+                            </span>
+                        </td>
+                        <td style="padding:1rem; vertical-align:middle;">
+                            @if (r.TargetType == ReportTargetType.Opportunity)
+                            {
+                                <span style="background:#e8f0fe; color:#1a5a9c; padding:0.25rem 0.75rem;
+                                                     border-radius:50px; font-size:0.75rem; font-weight:600;">
+                                    Opportunity
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="background:#fef3e7; color:#b85e00; padding:0.25rem 0.75rem;
+                                                     border-radius:50px; font-size:0.75rem; font-weight:600;">
+                                    Organization
+                                </span>
+                            }
+                        </td>
+                        <td style="padding:1rem; vertical-align:middle; color:#4b5563; font-size:0.9rem;">
+                            @(r.Reason.Length > 30 ? r.Reason.Substring(0, 30) + "..." : r.Reason)
+                        </td>
+                        <td style="padding:1rem; vertical-align:middle; color:#8e94a7; font-size:0.85rem;">
+                            @r.CreatedAt.ToString("dd MMM yyyy")
+                        </td>
+                        <td style="padding:1rem; vertical-align:middle;">
+                            @if (r.Status == ReportStatus.Pending)
+                            {
+                                <span style="background:#fef3e7; color:#b85e00; padding:0.25rem 0.75rem;
+                                                     border-radius:50px; font-size:0.75rem; font-weight:600;">
+                                    Pending
+                                </span>
+                            }
+                            else if (r.Status == ReportStatus.Resolved)
+                            {
+                                <span style="background:#f0f9f0; color:#2d7a2d; padding:0.25rem 0.75rem;
+                                                     border-radius:50px; font-size:0.75rem; font-weight:600;">
+                                    Resolved
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="background:#f5f5f5; color:#8e94a7; padding:0.25rem 0.75rem;
+                                                     border-radius:50px; font-size:0.75rem; font-weight:600;">
+                                    Dismissed
+                                </span>
+                            }
+                        </td>
+                        <td style="padding:1rem; vertical-align:middle;">
+                            <a asp-area="Admin" asp-controller="Report" asp-action="Review"
+                               asp-route-id="@r.ReportId"
+                               style="font-size:0.85rem; color:#8b92d1; font-weight:600;
+                                          text-decoration:none; border:1px solid #8b92d1;
+                                          padding:0.3rem 0.9rem; border-radius:8px;">
+                                Review
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterRows() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.report-row').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}

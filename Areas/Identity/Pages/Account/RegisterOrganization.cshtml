@@ -1,0 +1,357 @@
+﻿@page
+@model RegisterOrganizationModel
+@{
+    ViewData["Title"] = "Register Organization Account";
+}
+
+<link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h1>REGISTER YOUR ORGANIZATION</h1>
+            <p>Join as an organization to post volunteer opportunities</p>
+            <div class="header-underline"></div>
+        </div>
+
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" enctype="multipart/form-data" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <div class="form-grid">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label asp-for="Input.OrganizationName">ORGANIZATION NAME <span class="required">*</span></label>
+                        <input asp-for="Input.OrganizationName" class="form-control" placeholder="Enter organization name" />
+                        <span asp-validation-for="Input.OrganizationName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Email">OFFICIAL EMAIL <span class="required">*</span></label>
+                        <input asp-for="Input.Email" class="form-control" placeholder="org@tmails.net" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Phone">OFFICIAL PHONE NUMBER <span class="required">*</span></label>
+                        <input asp-for="Input.Phone" class="form-control" placeholder="03-12345678" />
+                        <span asp-validation-for="Input.Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Password">PASSWORD <span class="required">*</span></label>
+                        <input asp-for="Input.Password" type="password" class="form-control" />
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.ConfirmPassword">CONFIRM PASSWORD <span class="required">*</span></label>
+                        <input asp-for="Input.ConfirmPassword" type="password" class="form-control" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label asp-for="Input.Logo">ORGANIZATION LOGO</label>
+                        <input asp-for="Input.Logo" type="file" class="form-control" />
+                        <span asp-validation-for="Input.Logo" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.RegistrationCertificate">ORGANIZATION REGISTRATION CERTIFICATE</label>
+                        <input asp-for="Input.RegistrationCertificate" type="file" class="form-control" />
+                        <span asp-validation-for="Input.RegistrationCertificate" class="text-danger"></span>
+                    </div>
+					<div class="form-group">
+						<label asp-for="Input.Mission">MISSION STATEMENT</label>
+						<textarea asp-for="Input.Mission" class="form-control" rows="4" placeholder="Describe your organization's mission..."></textarea>
+						<span asp-validation-for="Input.Mission" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+
+            <button id="registerSubmit" type="submit" class="btn-submit">SUBMIT FOR REVIEW</button>
+
+            <div class="login-link">
+                Already have an account? <a asp-area="Identity" asp-page="/Account/Login">Login</a>
+            </div>
+
+            <div class="divider">OR</div>
+
+            <div class="login-link">
+                Be a volunteer? <a asp-area="Identity" asp-page="/Account/RegisterVolunteer">Create Volunteer Account</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Application Submitted Modal -->
+<div id="applicationSubmittedModal"
+     style="display:none; position:fixed; inset:0; z-index:9999;
+            background:rgba(0,0,0,0.35); backdrop-filter:blur(3px);
+            align-items:center; justify-content:center;">
+
+    <div style="background:white; border-radius:24px; padding:2.5rem 2rem;
+                max-width:420px; width:90%; margin:auto;
+                box-shadow:0 20px 60px rgba(63,64,121,0.18);
+                animation:modalSlideIn 0.35s cubic-bezier(.22,.68,0,1.2) both;
+                text-align:center;">
+
+        <!-- Envelope Icon -->
+        <div style="width:72px; height:72px; background:#f0f2ff; border-radius:50%;
+                    display:flex; align-items:center; justify-content:center;
+                    margin:0 auto 1.25rem; border:2px solid #e0e4ff;">
+            <i class="bi bi-envelope-at" style="font-size:2rem; color:#3f4079;"></i>
+        </div>
+
+        <h2 style="color:#3f4079; font-size:1.35rem; font-weight:700; margin:0 0 0.75rem;">
+            Application Submitted
+        </h2>
+
+        <p style="color:#5a5f7d; font-size:0.95rem; line-height:1.6; margin:0 0 1.5rem;">
+            Thank you for submitting your organization's profile for review.
+            Our team will verify your documents shortly.
+        </p>
+
+        <!-- Info Box -->
+        <div style="background:#f5f7ff; border:1px solid #e0e4ff; border-radius:14px;
+                    padding:1rem 1.25rem; text-align:left; margin-bottom:1.75rem;">
+            <div style="display:flex; gap:0.6rem; margin-bottom:0.75rem;">
+                <i class="bi bi-info-circle" style="color:#3f4079; flex-shrink:0; margin-top:2px;"></i>
+                <p style="color:#4b5073; font-size:0.85rem; line-height:1.55; margin:0;">
+                    You will receive an email notification once your application has been
+                    <strong>approved</strong> or <strong>rejected</strong>
+                </p>
+            </div>
+            @* <div style="display:flex; gap:0.6rem;">
+                <i class="bi bi-info-circle" style="color:#3f4079; flex-shrink:0; margin-top:2px;"></i>
+                <p style="color:#4b5073; font-size:0.85rem; line-height:1.55; margin:0;">
+                    If approved, the email will contain a secure link to activate and
+                    access your new account.
+                </p>
+            </div> *@
+        </div>
+
+        <!-- GOT IT Button -->
+        <button onclick="closeApplicationModal()"
+                style="background:#3f4079; color:white; border:none; border-radius:50px;
+                       padding:0.85rem 0; width:100%; font-size:1rem; font-weight:700;
+                       cursor:pointer; letter-spacing:0.5px;
+                       box-shadow:0 4px 14px rgba(99,102,241,0.35);">
+            GOT IT
+        </button>
+    </div>
+</div>
+
+<!-- ww fix -->
+<style>
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .register-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: #f5f7fb;
+    }
+
+    .register-card {
+        max-width: 900px;
+        width: 100%;
+        background: white;
+        border-radius: 32px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        border: 1px solid #edf2f9;
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .register-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #3f4079;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .register-header p {
+        color: #8e94a7;
+        font-size: 0.85rem;
+    }
+
+    .header-underline {
+        width: 50px;
+        height: 3px;
+        background: #8b92d1;
+        border-radius: 3px;
+        margin: 0.75rem auto 0;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2d3e4f;
+        margin-bottom: 0.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #8b92d1;
+        box-shadow: 0 0 0 3px rgba(139, 146, 209, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .full-width {
+        grid-column: span 2;
+    }
+
+    .btn-submit {
+        width: auto;
+        min-width: 500px;
+        padding: 0.75rem 2rem;
+        background: #8b92d1;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: block;
+        margin: 1rem auto 0;
+    }
+
+    .btn-submit:hover {
+        background: #7a82c5;
+        transform: translateY(-1px);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .login-link a {
+        color: #8b92d1;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #cbd5e1;
+        font-size: 0.75rem;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .divider::before {
+        margin-right: 1rem;
+    }
+
+    .divider::after {
+        margin-left: 1rem;
+    }
+
+    .text-danger {
+        color: #ef4444;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .register-card {
+        padding: 1.5rem;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function showApplicationModal() {
+            const modal = document.getElementById('applicationSubmittedModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeApplicationModal() {
+            const modal = document.getElementById('applicationSubmittedModal');
+            modal.style.opacity = '0';
+            modal.style.transition = 'opacity 0.2s';
+            setTimeout(() => {
+                window.location.href = '/Identity/Account/Login';
+            }, 200);
+        }
+
+        // Close when clicking the dark backdrop
+        document.getElementById('applicationSubmittedModal')
+            .addEventListener('click', function (e) {
+                if (e.target === this) closeApplicationModal();
+            });
+
+        // Auto-show if the POST succeeded
+        @if (TempData["RegistrationSuccess"] != null)
+        {
+                <text>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        showApplicationModal();
+                    });
+                </text>
+        }
+    </script>
+}

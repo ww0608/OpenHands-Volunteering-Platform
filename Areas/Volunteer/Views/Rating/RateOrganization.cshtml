@@ -1,0 +1,102 @@
+﻿@* By ANGEL *@
+@model OpenHandsVolunteerPlatform.ViewModels.RatingViewModel
+
+@{
+    ViewData["Title"] = "Rate Organization";
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div style="max-width:600px; margin:2rem auto; padding:0 2rem;">
+    <h1 class="page-title" style="font-size:1.8rem;">Rate @Model.OrganizationName</h1>
+    <p style="color:#8e94a7;">Your feedback helps other volunteers.</p>
+
+    @* @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    } *@
+
+    <div class="info-card" style="margin-top:1.5rem;">
+        <form method="post" asp-action="Submit">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="OrganizationId" />
+            <input type="hidden" asp-for="OpportunityId" />
+
+            @if (Model.HasRated)
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> You previously rated this organization.
+                </div>
+            }
+
+            <!-- Star Rating -->
+            <div style="margin-bottom:1.5rem;">
+                <label style="font-weight:600; display:block; margin-bottom:0.5rem;">Your Rating</label>
+                <div style="display:flex; gap:0.5rem; font-size:2rem;">
+                    <div class="star-container" style="display:flex; gap:0.5rem; font-size:2rem;">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <label style="cursor:pointer; margin:0;">
+                                <input type="radio" name="Stars" value="@i" style="display:none;"
+                                       @(Model.ExistingRating == i ? "checked" : "") />
+                                <i class="bi @(Model.ExistingRating >= i ? "bi-star-fill" : "bi-star") rating-star"
+                                   style="color:#ffc107;"
+                                   onmouseover="highlightStars(@i)"
+                                   onclick="selectStar(@i)"></i>
+                            </label>
+                        }
+                    </div>
+                </div>
+                <span asp-validation-for="Stars" class="text-danger"></span>
+            </div>
+
+            <!-- Comment -->
+            <div style="margin-bottom:1.5rem;">
+                <label asp-for="Comment" style="font-weight:600; display:block; margin-bottom:0.5rem;">Comment (optional)</label>
+                <textarea asp-for="Comment" rows="4" style="width:100%; padding:0.75rem; border-radius:12px; border:1px solid #e2e8f0;"></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary-action"
+                    style="width:auto; min-width:160px; padding:0.75rem 2rem;
+               display:block; margin:0 auto; text-align:center;">
+                @(Model.HasRated ? "Update" : "Submit Rating")
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedRating = 0;
+
+        // Set initial selected rating
+        selectedRating = @(Model.ExistingRating ?? 0);
+
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('.rating-star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('bi-star');
+                    star.classList.add('bi-star-fill');
+                    star.style.color = '#ffc107';
+                } else {
+                    star.classList.remove('bi-star-fill');
+                    star.classList.add('bi-star');
+                    star.style.color = '#ffc107';
+                }
+            });
+        }
+
+        function selectStar(rating) {
+            selectedRating = rating;
+            const radio = document.querySelector(`input[name="Stars"][value="${rating}"]`);
+            if (radio) radio.checked = true;
+            highlightStars(rating);
+        }
+
+        // Reset to selected rating when mouse leaves
+        document.querySelector('.star-container')?.addEventListener('mouseleave', function() {
+            highlightStars(selectedRating);
+        });
+    </script>
+}

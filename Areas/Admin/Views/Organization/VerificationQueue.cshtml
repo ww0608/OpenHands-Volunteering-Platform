@@ -1,0 +1,165 @@
+﻿@*By ANGEL - admin side combined *@
+
+@model List<OpenHandsVolunteerPlatform.Models.Organization>
+
+@{
+    ViewData["Title"] = "Organization Verification";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+}
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="~/css/AdminPage.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <!-- ww fix -->
+    <h1 class="page-title">Organization Verification</h1>
+    <p class="page-subtitle">Review and verify pending organizations</p>
+
+    @*@if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }*@
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="search-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput"
+                   placeholder="Sesrch..." value="@currentSearch">
+        </div>
+        <a href="@Url.Action("Export", new { type = "pending" })" class="btn-export">
+            <i class="bi bi-download"></i> Export CSV
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+        @if (Model.Any())
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Organization Name</th>
+                        <th>Email</th>
+                        <th>Submitted Date</th>
+                        <th>Review</th>
+                        @*<th>Actions</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int orgRow = 1;
+                    }
+                    @foreach (var org in Model)
+                    {
+                        <tr>
+                            <td style="color:#8e94a7; font-weight:600;">@(orgRow++)</td>
+                            <td style="font-weight:500;">@org.OrganizationName</td>
+                            <td>@(org.User?.Email ?? "-")</td>
+                            <td>@org.CreatedAt.ToString("dd MMMM yyyy")</td>
+                            <td>
+                                <a asp-area="Admin" asp-controller="Organization"
+                                   asp-action="ReviewOrg" asp-route-id="@org.OrganizationId"
+                                   class="btn-review">
+                                    <i class="bi bi-eye"></i> Review
+                                </a>
+                            </td>
+                            @*
+                            <td>
+                                <button class="btn-action approve"
+                                        onclick="approveOrg('@org.OrganizationId', '@org.OrganizationName')">
+                                    <i class="bi bi-check-lg"></i> Approve
+                                </button>
+                                <button class="btn-action reject"
+                                        onclick="rejectOrg('@org.OrganizationId', '@org.OrganizationName')">
+                                    <i class="bi bi-x-lg"></i> Reject
+                                </button>
+                            </td>
+                            *@
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-check-circle"></i>
+                <h3>No pending organizations</h3>
+                <p>All organizations have been reviewed.</p>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        let currentOrgId = '';
+        let currentOrgName = '';
+
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                window.location.href =
+                    `@Url.Action("VerificationQueue")?search=${encodeURIComponent(this.value)}`;
+            }, 500);
+        });
+
+        // function approveOrg(id, name) {
+        //     if (confirm(`Approve ${name}?`)) {
+        //         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        //         fetch(`/Admin/Organization/Approve/${id}`, {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'RequestVerificationToken': token
+        //             }
+        //         })
+        //         .then(r => r.json())
+        //         .then(data => {
+        //             if (data.success) { alert(`${name} approved.`); location.reload(); }
+        //             else alert('Error: ' + data.message);
+        //         });
+        //     }
+        // }
+
+        // function rejectOrg(id, name) {
+        //     currentOrgId = id;
+        //     currentOrgName = name;
+        //     document.getElementById('rejectReason').value = '';
+        //     new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        // }
+
+        // document.getElementById('confirmRejectBtn').addEventListener('click', function() {
+        //     const reason = document.getElementById('rejectReason').value;
+        //     if (!reason.trim()) { alert('Please provide a reason.'); return; }
+
+        //     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        //     fetch(`/Admin/Organization/Reject/${currentOrgId}`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'RequestVerificationToken': token
+        //         },
+        //         body: JSON.stringify({ reason: reason })
+        //     })
+        //     .then(r => r.json())
+        //     .then(data => {
+        //         if (data.success) {
+        //             alert(`${currentOrgName} rejected.`);
+        //             bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide();
+        //             location.reload();
+        //         } else alert('Error: ' + data.message);
+        //     });
+        // });
+    </script>
+}

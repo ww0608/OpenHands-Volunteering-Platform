@@ -1,0 +1,69 @@
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+@model List<OpenHandsVolunteerPlatform.Models.Volunteer>
+@{
+    var opportunity = ViewBag.Opportunity as OpenHandsVolunteerPlatform.Models.Opportunity;
+    ViewData["Title"] = "Issue Certificates";
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div style="max-width:900px; margin:2rem auto; padding:0 2rem;">
+    <div class="breadcrumb">
+        <a asp-action="Details" asp-route-id="@opportunity.OpportunityId">
+            <i class="bi bi-arrow-left"></i> Back to Event
+        </a>
+    </div>
+
+    <h1 class="page-title" style="font-size:1.8rem;">Issue Certificates</h1>
+    <p style="color:#8e94a7;">
+        Event: <strong>@opportunity.Title</strong><br />
+        Date: @opportunity.Date.ToString("dd MMMM yyyy")
+    </p>
+
+    @* @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    } *@
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-file-earmark-pdf"></i>
+            <h3>No certificates to issue</h3>
+            <p>All volunteers for this event already have certificates.</p>
+        </div>
+    }
+    else
+    {
+        <div class="info-card" style="margin-top:1.5rem;">
+            <h3 style="margin-bottom:1rem;">Volunteers to Issue Certificates</h3>
+            <div style="display:grid; gap:0.75rem;">
+                @foreach (var volunteer in Model)
+                {
+                    <div style="display:flex; justify-content:space-between; align-items:center;
+                                        padding:1rem; background:#f8fafc; border-radius:16px;">
+                        <div>
+                            <strong>@volunteer.Name</strong><br />
+                            <span style="font-size:0.85rem; color:#8e94a7;">@volunteer.User?.Email</span>
+                        </div>
+                        <form method="post" asp-action="GenerateCertificate">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="opportunityId" value="@opportunity.OpportunityId" />
+                            <input type="hidden" name="volunteerId" value="@volunteer.VolunteerId" />
+                            <button type="submit" class="btn-primary-action" style="padding:0.5rem 1rem;">
+                                <i class="bi bi-file-earmark-pdf"></i> Issue Certificate
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

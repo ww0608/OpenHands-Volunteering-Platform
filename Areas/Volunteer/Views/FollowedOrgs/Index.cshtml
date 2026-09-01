@@ -1,0 +1,234 @@
+﻿@* By ANGEL *@
+@model OpenHandsVolunteerPlatform.ViewModels.FollowedOrganizationsViewModel
+
+@{
+    ViewData["Title"] = "Followed Organizations";
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">Followed Organizations</h1>
+        <p style="color:#8e94a7; margin-top:-1rem;">Organizations you are following</p>
+    </div>
+</div>
+
+<div class="container-custom" style="max-width:1300px; margin: 2rem auto; padding: 0 2rem;">
+    <!-- Search bar -->
+    <div class="action-bar">
+        <div></div>
+        <!--ww fix-->
+        <div class="search-filter-group">
+            <!-- Filter Icon with Dropdown -->
+            <div class="dropdown">
+                <button class="filter-icon dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="padding: 1rem; min-width: 250px;">
+                    @* <!-- Mission Filter -->
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Search in Mission</label>
+                        <input type="text" id="missionFilter" class="form-control form-control-sm" placeholder="Enter mission...">
+                    </li> *@
+
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Organization Type</label>
+                        <select id="typeFilter" class="form-select form-select-sm">
+                            <option value="all">All Types</option>
+                            <option value="Non-Profit">Non-Profit</option>
+                            <option value="Charity">Charity</option>
+                            <option value="Community Organization">Community Organization</option>
+                            <option value="Educational Institution">Educational Institution</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </li>
+                    <!-- Sort By -->
+                    <li class="mb-2">
+                        <label class="form-label fw-bold">Sort By</label>
+                        <select id="sortFilter" class="form-select form-select-sm">
+                            <option value="recent">Recently Followed</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="name">Name (A-Z)</option>
+                            <option value="followers">Most Followers</option>
+                        </select>
+                    </li>
+
+                    @* <li><hr class="dropdown-divider"></li> *@
+                    <li>
+                        <div class="d-flex gap-2 mt-4">
+                            <button id="applyFilters" class="btn btn-primary btn-sm w-100">Apply Filters</button>
+                            <button id="clearFilters" class="btn btn-outline-secondary btn-sm w-100">Clear</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search..."/>
+                <i class="bi bi-search search-icon-right"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="opportunity-grid" id="orgGrid">
+
+        @if (!Model.FollowedOrgs.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-bookmark-x"></i>
+                <h3>No followed organizations</h3>
+                <p>You have not followed any organizations yet.</p>
+                <a asp-area="Volunteer" asp-controller="Organizations" asp-action="Index"
+                   class="btn-primary-action mt-3" style="text-decoration:none;">
+                    Browse Organizations
+                </a>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model.FollowedOrgs)
+            {
+                <div class="opportunity-card org-card-item" style="text-align:center;"
+                     data-type="@item.Organization.OrganizationType"
+                     data-name="@item.Organization.OrganizationName"
+                     data-followed="@item.FollowedAt.Ticks"
+                     data-followers="@item.FollowerCount">
+                    <!-- Logo -->
+                    <div style="margin-bottom:1rem;">
+                        @if (!string.IsNullOrEmpty(item.Organization.LogoPath))
+                        {
+                            <img src="@Url.Content("~" + item.Organization.LogoPath)"
+                                 style="width:72px; height:72px; object-fit:cover; border-radius:50%; border:2px solid #edf2f9;" />
+                        }
+                        else
+                        {
+                            <div style="width:72px; height:72px; border-radius:50%; background:#f0f2ff;
+                                                    display:flex; align-items:center; justify-content:center;
+                                                    margin:0 auto; border:2px solid #edf2f9;">
+                                <i class="bi bi-building" style="font-size:1.8rem; color:#8b92d1;"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Name + follower count -->
+                    <h3 class="card-title" style="text-align:center; margin-bottom:0.25rem;">
+                        @item.Organization.OrganizationName
+                    </h3>
+
+					<p style="font-size:0.8rem; color:#8e94a7; margin-bottom:1.5rem; font-weight:600;">
+						<i class="bi bi-people"></i> @item.FollowerCount followers
+					</p>
+
+                    @* <!-- Mission -->
+                    <p class="card-description">
+                        @(item.Organization.Mission ?? "-")
+                    </p> *@
+
+                    <!-- Meta info -->
+                    <ul class="metadata-list">
+                        <li class="metadata-item">
+                            <i class="bi bi-envelope"></i>
+                            <span>@(item.Organization.User?.Email ?? "-")</span>
+                        </li>
+                        <li class="metadata-item">
+                            <i class="bi bi-telephone"></i>
+                            <span>@(item.Organization.Phone ?? "-")</span>
+                        </li>
+                        <li class="metadata-item">
+                            <i class="bi bi-clock"></i>
+                            <span>Following since @item.FollowedAt.ToString("dd MMM yyyy")</span>
+                        </li>
+                    </ul>
+
+                    <!-- ww fix -->
+                    <!-- View Details Button - ADD THIS -->
+                    <a asp-area="Volunteer"
+                       asp-controller="Organizations"
+                       asp-action="Profile"
+                       asp-route-id="@item.Organization.OrganizationId"
+                       class="btn-view-details"
+                       style="margin-bottom: 0.75rem;">
+                        View Details
+                    </a>
+                    <div></div>
+
+                    <!-- Unfollow button -->
+                    <form method="post" asp-area="Volunteer" asp-controller="FollowedOrgs" asp-action="Unfollow">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="organizationId" value="@item.Organization.OrganizationId" />
+                        <button type="submit" class="btn-view-details" style="border-color:#f0a0a0; color:#c0392b;">
+                            Unfollow
+                        </button>
+                    </form>
+
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const typeFilter = document.getElementById('typeFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const applyBtn = document.getElementById('applyFilters');
+        const clearBtn = document.getElementById('clearFilters');
+
+        function filterAndSort() {
+            const search = searchInput.value.toLowerCase();
+            const type = typeFilter.value.toLowerCase();
+            const sort = sortFilter.value;
+
+            const grid = document.getElementById('orgGrid');
+            const cards = Array.from(grid.querySelectorAll('.opportunity-card'));
+
+            // FILTER
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+                const desc = card.querySelector('.card-description')?.textContent.toLowerCase() || '';
+                const cardType = card.dataset.type?.toLowerCase() || '';
+
+                const matchSearch = title.includes(search) || desc.includes(search);
+                const matchType = type === 'all' || cardType === type;
+
+                card.style.display = (matchSearch && matchType) ? 'flex' : 'none';
+            });
+
+            // SORT
+            const visibleCards = cards.filter(c => c.style.display !== 'none');
+
+            visibleCards.sort((a, b) => {
+                switch (sort) {
+                    case 'name':
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                    case 'oldest':
+                        return a.dataset.followed - b.dataset.followed;
+                    case 'followers':
+                        return b.dataset.followers - a.dataset.followers;
+                    default:
+                        return b.dataset.followed - a.dataset.followed;
+                }
+            });
+
+            // RE-APPEND
+            visibleCards.forEach(card => grid.appendChild(card));
+        }
+
+        // EVENTS
+        searchInput.addEventListener('keyup', filterAndSort);
+        applyBtn.addEventListener('click', filterAndSort);
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            typeFilter.value = 'all';
+            sortFilter.value = 'recent';
+            filterAndSort();
+        });
+    </script>
+}

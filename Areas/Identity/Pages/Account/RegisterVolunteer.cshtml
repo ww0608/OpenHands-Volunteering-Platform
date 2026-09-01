@@ -1,0 +1,243 @@
+﻿@page
+@model RegisterVolunteerModel
+@{
+    ViewData["Title"] = "Register Individual Account";
+}
+
+<link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h1>CREATE INDIVIDUAL ACCOUNT</h1>
+            <p>Join our volunteer community</p>
+            <div class="header-underline"></div>
+        </div>
+
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+
+            <div class="form-group">
+                <label asp-for="Input.Name">FULL NAME</label>
+                <input asp-for="Input.Name" class="form-control" placeholder="Enter your full name" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Email">EMAIL</label>
+                <input asp-for="Input.Email" class="form-control" placeholder="you@tmails.net" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Phone">MOBILE PHONE</label>
+                <input asp-for="Input.Phone" class="form-control" placeholder="012-3456789" />
+                <span asp-validation-for="Input.Phone" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.DateOfBirth">DATE OF BIRTH</label>
+                <input asp-for="Input.DateOfBirth" type="date" class="form-control" />
+                <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Password">PASSWORD</label>
+                <input asp-for="Input.Password" type="password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.ConfirmPassword">CONFIRM PASSWORD</label>
+                <input asp-for="Input.ConfirmPassword" type="password" class="form-control" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn-register">CREATE ACCOUNT</button>
+
+            <div class="login-link">
+                Already have an account? <a asp-page="./Login">Login</a>
+            </div>
+
+            <div class="divider">OR</div>
+
+            <div class="org-link">
+                Looking to create an organisation? <a asp-page="./RegisterOrganization">Create Organisation Account</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ww fix -->
+<style>
+    .register-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: #f5f7fb;
+    }
+
+    .register-card {
+        max-width: 500px;
+        width: 100%;
+        background: white;
+        border-radius: 32px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        border: 1px solid #edf2f9;
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .register-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #3f4079;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .register-header p {
+        color: #8e94a7;
+        font-size: 0.85rem;
+    }
+
+    .header-underline {
+        width: 50px;
+        height: 3px;
+        background: #8b92d1;
+        border-radius: 3px;
+        margin: 0.75rem auto 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2d3e4f;
+        margin-bottom: 0.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #8b92d1;
+        box-shadow: 0 0 0 3px rgba(139, 146, 209, 0.1);
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 0.85rem;
+        background: #8b92d1;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 0.5rem;
+    }
+
+        .btn-register:hover {
+            background: #7a82c5;
+            transform: translateY(-1px);
+        }
+
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .login-link a {
+        color: #8b92d1;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    .org-link {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .org-link a {
+        color: #8b92d1;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .org-link a:hover {
+            text-decoration: underline;
+        }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #cbd5e1;
+        font-size: 0.75rem;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .divider::before {
+        margin-right: 1rem;
+    }
+
+    .divider::after {
+        margin-left: 1rem;
+    }
+
+    .text-danger {
+        color: #ef4444;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .validation-summary {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 0.75rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

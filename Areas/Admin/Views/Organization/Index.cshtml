@@ -1,0 +1,163 @@
+﻿@* By ANGEL - admin side combined *@
+
+@model List<OpenHandsVolunteerPlatform.Models.Organization>
+
+@{
+    ViewData["Title"] = "Organization Management";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+}
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="~/css/AdminPage.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <!-- ww fix -->
+    <h1 class="page-title">Organization Management</h1>
+    <p class="page-subtitle">Manage approved organizations on the platform</p>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="search-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput"
+                   placeholder="Search..." value="@currentSearch">
+        </div>
+        <a href="@Url.Action("Export", new { type = "all" })" class="btn-export">
+            <i class="bi bi-download"></i> Export CSV
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+        @if (Model.Any())
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Organization Name</th>
+                        <th>Email</th>
+                        <th>Joined Date</th>
+                        <th>Event Count</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int orgRow = 1;
+                    }
+                    @foreach (var org in Model)
+                    {
+                        var isLocked = org.User != null && org.User.LockoutEnd.HasValue
+                        && org.User.LockoutEnd > DateTimeOffset.Now;
+                        <tr>
+                            <td style="color:#8e94a7; font-weight:600;">@(orgRow++)</td>
+                            <td><strong>@org.OrganizationName</strong></td>
+                            <td>@(org.User?.Email ?? "-")</td>
+                            <td>@org.CreatedAt.ToString("dd MMMM yyyy")</td>
+                            <td>@(org.Opportunities?.Count ?? 0)</td>
+                            <td>
+                                <span class="status-badge @(isLocked ? "rejected" : "approved")">
+                                    @(isLocked ? "Locked" : "Active")
+                                </span>
+                            </td>
+                            <td>
+                                @if (isLocked)
+                                {
+                                    <button class="btn-action enable"
+                                            onclick="enableOrg('@org.OrganizationId', '@org.OrganizationName')"
+                                            title="Enable Account">
+                                        <i class="bi bi-unlock"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-action disable"
+                                            onclick="disableOrg('@org.OrganizationId', '@org.OrganizationName')"
+                                            title="Disable Account"
+                                            style="background-color:#fee2e2;">
+                                        <i class="bi bi-lock" style="color:#b91c1c;"></i>
+                                    </button>
+                                }
+                                @* <form method="post" asp-area="Admin" asp-controller="Organization"
+                                      asp-action="Delete" style="display:inline;"
+                                      onsubmit="return confirm('Delete this organization?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orgId" value="@org.OrganizationId" />
+                                    <button type="submit" class="btn-action"
+                                            style="background-color:#fee2e2;">
+                                        <i class="bi bi-trash" style="color:#b91c1c;"></i>
+                                    </button>
+                                </form> *@
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-building"></i>
+                <h3>No organizations found</h3>
+                <p>No organizations match your search.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                window.location.href =
+                    `@Url.Action("Index")?search=${encodeURIComponent(this.value)}`;
+            }, 500);
+        });
+
+        function disableOrg(orgId, orgName) {
+            if (confirm(`Disable ${orgName}?`)) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                fetch(`/Admin/Organization/Disable/${orgId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) { alert(`${orgName} disabled.`); location.reload(); }
+                    else alert('Error: ' + data.message);
+                });
+            }
+        }
+
+        function enableOrg(orgId, orgName) {
+            if (confirm(`Enable ${orgName}?`)) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                fetch(`/Admin/Organization/Enable/${orgId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) { alert(`${orgName} enabled.`); location.reload(); }
+                    else alert('Error: ' + data.message);
+                });
+            }
+        }
+
+    </script>
+}

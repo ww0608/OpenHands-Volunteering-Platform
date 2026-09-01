@@ -1,0 +1,90 @@
+﻿@* By ANGEL *@
+
+@{
+    ViewData["Title"] = "Submit Report";
+    var targetType = (OpenHandsVolunteerPlatform.Models.Enums.ReportTargetType)ViewBag.TargetType;
+    var targetName = (string)ViewBag.TargetName;
+    var targetId = (string)ViewBag.TargetId;
+}
+
+<link rel="stylesheet" href="~/css/organizationPage.css" asp-append-version="true" />
+
+<div class="container-custom" style="max-width:700px; margin:2rem auto; padding:0 2rem;">
+
+    <div class="breadcrumb">
+        <a href="javascript:history.back()">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <h1 class="page-title">Submit a Report</h1>
+    <p style="color:#8e94a7; margin-top:-1rem;">
+        Reporting: <strong style="color:#3f4079;">@targetName</strong>
+    </p>
+
+    @* @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    } *@
+
+    <div class="info-card" style="margin-top:1.5rem;">
+        <form method="post" asp-area="Volunteer" asp-controller="Report" asp-action="Submit">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="targetId" value="@targetId" />
+            <input type="hidden" name="targetType" value="@((int)targetType)" />
+
+            <!-- Reason -->
+            <div style="margin-bottom:1.5rem;">
+                <label style="font-weight:600; color:#2d3e4f; margin-bottom:0.5rem; display:block;">
+                    Reason for reporting <span style="color:#e74c3c;">*</span>
+                </label>
+                <select name="reason" required
+                        style="width:100%; padding:0.75rem 1rem; border:1px solid #e2e8f0;
+                               border-radius:12px; font-size:0.95rem; color:#2d3e4f;
+                               background:white; appearance:none;">
+                    <option value="" disabled selected>Select a reason...</option>
+                    @if (targetType == OpenHandsVolunteerPlatform.Models.Enums.ReportTargetType.Opportunity)
+                    {
+                        <option value="Misleading information">Misleading information</option>
+                        <option value="Incorrect event details">Incorrect event details</option>
+                        <option value="Inappropriate content">Inappropriate content</option>
+                        <option value="Event does not exist">Event does not exist</option>
+                        <option value="Other">Other</option>
+                    }
+                    else
+                    {
+                        <option value="Scam or fraud">Scam or fraud</option>
+                        <option value="Fake organization">Fake organization</option>
+                        <option value="Inappropriate behavior">Inappropriate behavior</option>
+                        <option value="Misleading information">Misleading information</option>
+                        <option value="Other">Other</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Details -->
+            <div style="margin-bottom:1.5rem;">
+                <label style="font-weight:600; color:#2d3e4f; margin-bottom:0.5rem; display:block;">
+                    Additional details <span style="color:#8e94a7; font-weight:400;">(optional)</span>
+                </label>
+                <textarea name="details" rows="4"
+                          placeholder="Provide any additional information..."
+                          style="width:100%; padding:0.75rem 1rem; border:1px solid #e2e8f0;
+                                 border-radius:12px; font-size:0.95rem; color:#2d3e4f;
+                                 resize:vertical;"></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div style="display:flex; gap:1rem;">
+                <button type="submit" class="btn-primary-action">
+                    <i class="bi bi-flag"></i> Submit Report
+                </button>
+                <a href="javascript:history.back()" class="btn-view-details"
+                   style="width:auto; padding:0.75rem 1.5rem; display:inline-flex; align-items:center;">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>

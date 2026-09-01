@@ -1,0 +1,174 @@
+﻿@* By ANGEL - admin side combined *@
+
+@model List<OpenHandsVolunteerPlatform.ViewModels.AdminUserViewModel>
+@using OpenHandsVolunteerPlatform.Models.Enums
+
+@{
+    ViewData["Title"] = "User Management";
+    var currentFilter = ViewBag.CurrentFilter as string ?? "all";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+}
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="~/css/AdminPage.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <!-- ww fix -->
+    <h1 class="page-title">User Management</h1>
+    <p class="page-subtitle">Manage all volunteers on the platform</p>
+
+    @*@if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }*@
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="search-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput"
+                   placeholder="Search..." value="@currentSearch">
+        </div>
+        <a href="@Url.Action("Export", new { filter = currentFilter })" class="btn-export">
+            <i class="bi bi-download"></i> Export CSV
+        </a>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="filter-pills">
+        <a href="@Url.Action("Index", new { filter = "all", search = currentSearch })"
+           class="filter-pill @(currentFilter == "all" ? "active" : "")">All</a>
+        <a href="@Url.Action("Index", new { filter = "high", search = currentSearch })"
+           class="filter-pill @(currentFilter == "high" ? "active" : "")">High Credit</a>
+        <a href="@Url.Action("Index", new { filter = "average", search = currentSearch })"
+           class="filter-pill @(currentFilter == "average" ? "active" : "")">Average Credit</a>
+        <a href="@Url.Action("Index", new { filter = "low", search = currentSearch })"
+           class="filter-pill @(currentFilter == "low" ? "active" : "")">Low Credit</a>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-container">
+        @if (Model.Any())
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Joined Date</th>
+                        <th>Credit Score</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int userRow = 1;
+                    }
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td style="color:#8e94a7; font-weight:600;">@(userRow++)</td>
+                            <td>
+                                <strong>@user.Name</strong>
+                                @if (!user.IsActive)
+                                {
+                                    <span class="badge-disabled">Disabled</span>
+                                }
+                            </td>
+                            <td>@user.Email</td>
+                            <td>@user.JoinedDate.ToString("dd MMMM yyyy")</td>
+                            <td>
+                                <span class="credit-badge @user.CreditLevelClass">
+                                    @user.CreditLevelDisplay
+                                </span>
+                            </td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <button class="btn-action disable"
+                                            onclick="disableUser('@user.UserId', '@user.Name')"
+                                            title="Disable Account"
+                                            style="background-color:#fee2e2;">
+                                        <i class="bi bi-lock" style="color:#b91c1c;"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-action enable"
+                                            onclick="enableUser('@user.UserId', '@user.Name')"
+                                            title="Enable Account">
+                                        <i class="bi bi-unlock"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <h3>No users found</h3>
+                <p>No volunteers match your search criteria.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const currentFilter = '@currentFilter';
+                window.location.href =
+                    `@Url.Action("Index")?filter=${currentFilter}&search=${encodeURIComponent(this.value)}`;
+            }, 500);
+        });
+
+        function disableUser(userId, userName) {
+            if (confirm(`Disable ${userName}'s account?`)) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                fetch(`/Admin/Users/Disable/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) { alert(`${userName} disabled.`); location.reload(); }
+                    else alert('Error: ' + data.message);
+                });
+            }
+        }
+
+        function enableUser(userId, userName) {
+            if (confirm(`Enable ${userName}'s account?`)) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                fetch(`/Admin/Users/Enable/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) { alert(`${userName} enabled.`); location.reload(); }
+                    else alert('Error: ' + data.message);
+                });
+            }
+        }
+    </script>
+}
