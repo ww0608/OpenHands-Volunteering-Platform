@@ -1,0 +1,994 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - OpenHandsVolunteerPlatform</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/OpenHandsVolunteerPlatform.styles.css" asp-append-version="true" />
+
+    <!--By ANGEL, WW-->
+    <!-- Add this line for Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+</head>
+
+<body>
+    @* <header> dont wrap with <header> so that the nvbar stick on top*@ 
+        <nav class="navbar sticky-top top-0 navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1)">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="">
+                    <img src="~/images/LOGO.png" width="100px" class="d-inline-block align-text-top">
+                </a>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">    
+                    <!-- Left nav links -->
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Users" asp-action="Index">Users</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-dark dropdown-toggle" href="#" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        Organization
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="Organization" asp-action="Index">
+                                                Management
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="Organization" asp-action="VerificationQueue">
+                                                Verification
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Report" asp-action="Index">Reports</a>
+                                </li>
+                            }
+
+                            //By WW
+                            if (User.IsInRole("Organization"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Organization" asp-controller="Home" asp-action="Index">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Organization" asp-controller="Opportunity" asp-action="Index">Opportunity</a>
+                                </li>
+                            }
+
+                            //By WW
+                            if (User.IsInRole("Volunteer"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Volunteer" asp-controller="Opportunities" asp-action="Index">Opportunities</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Volunteer" asp-controller="Application" asp-action="Index">Application</a>
+                                </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Organization
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Volunteer" asp-controller="Organizations" asp-action="Index">
+                                            Organizations list
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Volunteer" asp-controller="FollowedOrgs" asp-action="Index">
+                                            Following
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            }
+
+                        } else {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                @* <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> *@
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="about">About</a>
+                            </li>
+						    <li class="nav-item">
+							    @* <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> *@
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="features">Features</a>
+						    </li>
+                        }
+                    </ul>
+
+                    <!--By WW-->
+                    <!-- Right side: bell + login -->
+                    <ul class="navbar-nav align-items-center">
+                        @if (User.IsInRole("Volunteer"))
+                        {
+                            <li class="nav-item dropdown me-2">
+                                <a class="nav-link" href="#" id="notifDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false"
+                                   style="position:relative; padding:0.25rem 0.5rem;">
+                                    <i class="bi bi-bell-fill" style="font-size:1.4rem; color:#f0a500;"></i>
+                                    <span id="notif-badge"
+                                          style="display:none; position:absolute; top:-4px; right:-2px;
+                                                     background:#e74c3c; color:white; font-size:0.6rem;
+                                                     font-weight:700; border-radius:50%; width:16px; height:16px;
+                                                     align-items:center; justify-content:center;">0</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow"
+                                    id="notif-dropdown-list"
+                                    style="min-width:320px; max-height:400px; overflow-y:auto; border-radius:16px; padding:0.5rem; z-index:9999;">
+                                    <li style="padding:0.75rem 1rem; font-weight:600; color:#3f4079; border-bottom:1px solid #edf2f9;">
+                                        Notifications
+                                        <a href="/Volunteer/Notifications/Index"
+                                           style="float:right; font-size:0.75rem; color:#8b92d1; font-weight:400;">
+                                            View all
+                                        </a>
+                                    </li>
+                                    <li id="notif-empty"
+                                        style="padding:1rem; text-align:center; color:#8e94a7; font-size:0.85rem;">
+                                        No new notifications
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        @if (User.IsInRole("Organization"))
+                        {
+                            <li class="nav-item dropdown me-2">
+                                <a class="nav-link" href="#" id="orgNotifDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false"
+                                   style="position:relative; padding:0.25rem 0.5rem;">
+                                    <i class="bi bi-bell-fill" style="font-size:1.4rem; color:#f0a500;"></i>
+                                    <span id="org-notif-badge"
+                                          style="display:none; position:absolute; top:-4px; right:-2px;
+                                                     background:#e74c3c; color:white; font-size:0.6rem;
+                                                     font-weight:700; border-radius:50%; width:16px; height:16px;
+                                                     align-items:center; justify-content:center;">0</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow"
+                                    id="org-notif-dropdown-list"
+                                    style="min-width:320px; max-height:400px; overflow-y:auto; border-radius:16px; padding:0.5rem; z-index:9999;">
+                                    <li style="padding:0.75rem 1rem; font-weight:600; color:#3f4079; border-bottom:1px solid #edf2f9;">
+                                        Notifications
+                                        <a href="/Organization/Notifications/Index"
+                                           style="float:right; font-size:0.75rem; color:#8b92d1; font-weight:400;">
+                                            View all
+                                        </a>
+                                    </li>
+                                    <li id="org-notif-empty"
+                                        style="padding:1rem; text-align:center; color:#8e94a7; font-size:0.85rem;">
+                                        No new notifications
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <partial name="_LoginPartial" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main role="main">
+            @* ww fix *@
+            @{
+                var errorMessage = TempData["ErrorMessage"] as string;
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 1rem 2rem;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> @errorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    TempData.Remove("ErrorMessage");
+                }
+            }
+            @{
+                var successMessage = TempData["SuccessMessage"] as string;
+                if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 1rem 2rem;">
+                        <i class="bi bi-check-circle-fill"></i> @successMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    TempData.Remove("SuccessMessage");
+                }
+            }
+            @RenderBody()
+        </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!--By WW-->
+    @if (User.IsInRole("Volunteer"))
+    {
+        <script>
+            async function loadNotifications() {
+                try {
+                    const res = await fetch('/Volunteer/Notifications/GetDropdown');
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    const badge = document.getElementById('notif-badge');
+                    const empty = document.getElementById('notif-empty');
+                    const list = document.getElementById('notif-dropdown-list');
+
+                    const oldItems = list.querySelectorAll('.notif-item');
+                    oldItems.forEach(i => i.remove());
+
+                    if (data.unreadCount > 0) {
+                        badge.style.display = 'flex';
+                        badge.textContent = data.unreadCount > 9 ? '9+' : data.unreadCount;
+                        empty.style.display = 'none';
+
+                        data.notifications.forEach(n => {
+                            const li = document.createElement('li');
+                            li.className = 'notif-item';
+                            li.style = 'padding:0.75rem 1rem; border-bottom:1px solid #f5f5f5; background:' + (n.isRead ? 'white' : '#f5f7ff');
+                            li.innerHTML = `
+                                <div style="font-size:0.85rem; color:#2d3e4f; font-weight:${n.isRead ? '400' : '600'}">
+                                    ${n.message}
+                                </div>
+                                <div style="font-size:0.75rem; color:#8e94a7; margin-top:0.2rem">${n.createdAt}</div>
+                            `;
+                            list.appendChild(li);
+                        });
+                    } else {
+                        badge.style.display = 'none';
+                        empty.style.display = 'block';
+                    }
+                } catch (e) {
+                    console.log('Notification load failed', e);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', loadNotifications);
+        </script>
+    }
+    @if (User.IsInRole("Organization"))
+    {
+        <script>
+            async function loadOrgNotifications() {
+                try {
+                    const res = await fetch('/Organization/Notifications/GetDropdown');
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    const badge = document.getElementById('org-notif-badge');
+                    const empty = document.getElementById('org-notif-empty');
+                    const list = document.getElementById('org-notif-dropdown-list');
+
+                    const oldItems = list.querySelectorAll('.notif-item');
+                    oldItems.forEach(i => i.remove());
+
+                    if (data.unreadCount > 0) {
+                        badge.style.display = 'flex';
+                        badge.textContent = data.unreadCount > 9 ? '9+' : data.unreadCount;
+                        empty.style.display = 'none';
+
+                        data.notifications.forEach(n => {
+                            const li = document.createElement('li');
+                            li.className = 'notif-item';
+                            li.style = 'padding:0.75rem 1rem; border-bottom:1px solid #f5f5f5; background:' + (n.isRead ? 'white' : '#f5f7ff');
+                            li.innerHTML = `
+                                <div style="font-size:0.85rem; color:#2d3e4f; font-weight:${n.isRead ? '400' : '600'}">
+                                    ${n.message}
+                                </div>
+                                <div style="font-size:0.75rem; color:#8e94a7; margin-top:0.2rem">${n.createdAt}</div>
+                            `;
+                            list.appendChild(li);
+                        });
+                    } else {
+                        badge.style.display = 'none';
+                        empty.style.display = 'block';
+                    }
+                } catch (e) {
+                    console.log('Org notification load failed', e);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', loadOrgNotifications);
+        </script>
+    }
+
+    <!-- WW FIX AI CHATBOT -->
+    @if (User.IsInRole("Organization"))
+    {
+        <!-- Chat Button -->
+        <div class="chat-btn" onclick="toggleChat()">
+            <i class="bi bi-chat-dots-fill"></i>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <span><i class="bi bi-robot"></i> OpenHands Assistant</span>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-content">
+                        👋 Hi! I'm the <b>OpenHands AI Opportunity Creator</b><br><br>
+                        Describe your volunteer opportunity and I'll help you create it!<br><br>
+                        <em>💡 Try: "Health Charity Marathon, charity run corporate with CHAGEE need 50 volunteers tomorrow from 9AM to 12PM at SPICE Arena"</em>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <textarea id="chatInput" placeholder="Type your opportunity description..." rows="1"></textarea>
+                <button onclick="sendChat()">Send</button>
+            </div>
+        </div>
+        <script>
+            // WW FIX AI CHATBOT SCRIPT
+            let lastExtractedData = null;
+
+            // Clear session AND UI when page loads
+            window.addEventListener('load', function() {
+                // Reset server session
+                fetch('/api/chat/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                }).catch(err => console.log('Reset error:', err));
+
+                // Clear local stored data
+                lastExtractedData = null;
+
+                // Reset the chat UI to initial state
+                const container = document.getElementById('chatMessages');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="message bot">
+                            <div class="message-content">
+                                👋 Hi! I'm the <b>OpenHands AI Opportunity Creator</b><br><br>
+                                Describe your volunteer opportunity and I'll help you create it!<br><br>
+                                <em>💡 Try: "Need 50 volunteers for Health Charity Marathon Event tomorrow from 9AM to 12PM at SPICE Arena Penang"</em>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                console.log('Chat session and UI reset on page load');
+            });
+
+            function toggleChat() {
+                document.getElementById('chatWindow').classList.toggle('open');
+            }
+
+            function addMessage(text, sender) {
+                const container = document.getElementById('chatMessages');
+                const div = document.createElement('div');
+                div.className = `message ${sender}`;
+                div.innerHTML = `<div class="message-content">${text}</div>`;
+                container.appendChild(div);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            async function sendChat() {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+                if (!message) return;
+
+                // Clear input
+                input.value = '';
+                input.style.height = '36px';
+                input.style.overflowY = 'hidden';
+
+                addMessage(message, 'user');
+                showTyping();
+
+                try {
+                    const response = await fetch('/api/chat/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: message })
+                    });
+
+                    const data = await response.json();
+                    hideTyping();
+
+                    // Add AI response to chat
+                    addMessage(data.reply, 'bot');
+
+                    // Store extracted data
+                    if (data.extracted && Object.keys(data.extracted).length > 0) {
+                        lastExtractedData = data.extracted;
+                        console.log('Extracted data:', lastExtractedData);
+
+                        // Check if all required fields are present
+                        if (lastExtractedData.Volunteers &&
+                            lastExtractedData.Date &&
+                            lastExtractedData.StartTime &&
+                            lastExtractedData.EndTime &&
+                            lastExtractedData.Location) {
+                            showCreateOpportunityButton();
+                        }
+                    }
+
+                    // If data.isComplete flag is true from server, also show button
+                    if (data.isComplete) {
+                        showCreateOpportunityButton();
+                    }
+
+                } catch (error) {
+                    hideTyping();
+                    console.error('Error:', error);
+                    addMessage('Sorry, I\'m having trouble connecting. Please try again.', 'bot');
+                }
+            }
+
+            function showCreateOpportunityButton() {
+                const existingBtn = document.getElementById('createOpportunityBtn');
+                if (existingBtn) existingBtn.remove();
+
+                const container = document.getElementById('chatMessages');
+                const buttonDiv = document.createElement('div');
+                buttonDiv.className = 'message bot';
+                buttonDiv.id = 'createOpportunityBtn';
+                buttonDiv.innerHTML = `
+                    <div class="message-content" style="background: #e0e4ff; text-align: center;">
+                        <button onclick="createOpportunity()" style="background: #8b92d1; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            ➕ Create Opportunity
+                        </button>
+                    </div>
+                `;
+                container.appendChild(buttonDiv);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            async function createOpportunity() {
+                if (!lastExtractedData) {
+                    console.error('No extracted data available');
+                    return;
+                }
+
+                console.log('Creating opportunity with data:', JSON.stringify(lastExtractedData, null, 2));
+
+                // Get title
+                let title = '';
+                if (lastExtractedData.Title && lastExtractedData.Title !== 'null' && lastExtractedData.Title.trim() !== '') {
+                    title = lastExtractedData.Title;
+                } else {
+                    title = 'New Volunteer Opportunity';
+                }
+
+                // Show loading message immediately
+                const loadingMsgId = 'generatingDescMsg';
+                const existingLoadingMsg = document.getElementById(loadingMsgId);
+                if (existingLoadingMsg) existingLoadingMsg.remove();
+
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = loadingMsgId;
+                loadingDiv.className = 'message bot';
+                loadingDiv.innerHTML = `
+                    <div class="message-content" style="background: #e0e4ff;">
+                        <i class="bi bi-hourglass-split"></i> 🤖 AI is generating a professional description for your opportunity... Please wait.
+                    </div>
+                `;
+                const container = document.getElementById('chatMessages');
+                container.appendChild(loadingDiv);
+                container.scrollTop = container.scrollHeight;
+
+                let description = '';
+
+                try {
+                    // Generate description using LLM
+                    const promptData = {
+                        title: title,
+                        volunteers: lastExtractedData.Volunteers || 'dedicated',
+                        isEmergency: lastExtractedData.IsEmergency === 'true' || lastExtractedData.IsEmergency === true
+                    };
+
+                    const descResponse = await fetch('/api/chat/generate-description', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(promptData)
+                    });
+
+                    const descData = await descResponse.json();
+                    description = descData.description;
+
+                    console.log('Generated description:', description);
+
+                    // Remove loading message
+                    const loadingMsg = document.getElementById(loadingMsgId);
+                    if (loadingMsg) loadingMsg.remove();
+
+                } catch (error) {
+                    console.error('Error generating description:', error);
+                    // Remove loading message
+                    const loadingMsg = document.getElementById(loadingMsgId);
+                    if (loadingMsg) loadingMsg.remove();
+
+                    // Simple fallback
+                    if (lastExtractedData.IsEmergency === 'true' || lastExtractedData.IsEmergency === true) {
+                        description = `🚨 URGENT: Join us for ${title}! We need volunteers immediately. Sign up now!`;
+                    } else {
+                        description = `✨ Join us for ${title}! We're looking for volunteers to help out. No experience needed. Sign up now and make a difference!`;
+                    }
+                }
+
+                // Build URL parameters
+                const params = new URLSearchParams();
+
+                params.append('title', title);
+                params.append('description', description);
+
+                if (lastExtractedData.Volunteers && lastExtractedData.Volunteers !== 'null') {
+                    params.append('volunteers', lastExtractedData.Volunteers);
+                }
+
+                if (lastExtractedData.Date && lastExtractedData.Date !== 'null') {
+                    params.append('date', lastExtractedData.Date);
+                }
+
+                if (lastExtractedData.ApplicationCloseDate && lastExtractedData.ApplicationCloseDate !== 'null') {
+                    params.append('applicationCloseDate', lastExtractedData.ApplicationCloseDate);
+                }
+
+                if (lastExtractedData.StartTime && lastExtractedData.StartTime !== 'null') {
+                    let startTime = lastExtractedData.StartTime.toString().trim();
+                    startTime = convertTo24Hour(startTime);
+                    params.append('startTime', startTime);
+                }
+
+                if (lastExtractedData.EndTime && lastExtractedData.EndTime !== 'null') {
+                    let endTime = lastExtractedData.EndTime.toString().trim();
+                    endTime = convertTo24Hour(endTime);
+                    params.append('endTime', endTime);
+                }
+
+                if (lastExtractedData.Location && lastExtractedData.Location !== 'null') {
+                    params.append('location', lastExtractedData.Location);
+                }
+
+                if (lastExtractedData.IsEmergency === 'true' || lastExtractedData.IsEmergency === true) {
+                    params.append('isEmergency', 'true');
+                    params.append('minimumCreditLevel', '2');
+                    console.log('Emergency mode enabled - Credit level set to: Growing and Above');
+                }
+
+                const redirectUrl = `/Organization/Opportunity/Create?${params.toString()}`;
+                console.log('FULL URL:', redirectUrl);
+
+                window.location.href = redirectUrl;
+            }
+
+            // Helper function to convert 24-hour time to 12-hour display format
+            function formatTimeForDisplay(timeStr) {
+                if (!timeStr) return '';
+
+                let hour = 0;
+                let minute = 0;
+
+                if (timeStr.includes(':')) {
+                    const parts = timeStr.split(':');
+                    hour = parseInt(parts[0]);
+                    minute = parseInt(parts[1]);
+                } else {
+                    hour = parseInt(timeStr);
+                }
+
+                const period = hour >= 12 ? 'PM' : 'AM';
+                let displayHour = hour % 12;
+                if (displayHour === 0) displayHour = 12;
+
+                if (minute > 0) {
+                    return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+                }
+                return `${displayHour} ${period}`;
+            }
+
+            // Helper function to convert time to 24-hour format
+            function convertTo24Hour(timeStr) {
+                if (!timeStr) return '';
+
+                let cleanTime = timeStr.toString().trim();
+
+                // If already in HH:MM format (24-hour), return as is
+                if (/^([01]\d|2[0-3]):([0-5]\d)$/.test(cleanTime)) {
+                    return cleanTime;
+                }
+
+                // Check if it's AM or PM
+                let isPM = /pm/i.test(cleanTime);
+                let hour = 0;
+                let minute = 0;
+                let numbers = cleanTime.match(/\d+/g);
+
+                if (numbers) {
+                    hour = parseInt(numbers[0]);
+                    minute = numbers[1] ? parseInt(numbers[1]) : 0;
+                }
+
+                // Convert to 24-hour format
+                if (isPM && hour === 12) {
+                    hour = 12;
+                } else if (isPM && hour < 12) {
+                    hour += 12;
+                } else if (!isPM && hour === 12) {
+                    hour = 0;
+                }
+
+                return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            }
+
+            function showTyping() {
+                const container = document.getElementById('chatMessages');
+                const typing = document.createElement('div');
+                typing.className = 'message bot';
+                typing.id = 'typingIndicator';
+                typing.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+                container.appendChild(typing);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            function hideTyping() {
+                const indicator = document.getElementById('typingIndicator');
+                if (indicator) indicator.remove();
+            }
+
+            // Auto-resize textarea and Enter key handling
+            document.addEventListener('DOMContentLoaded', function() {
+                const chatInput = document.getElementById('chatInput');
+                if (chatInput) {
+                    chatInput.addEventListener('input', function() {
+                        this.style.height = 'auto';
+                        const newHeight = Math.min(this.scrollHeight, 100);
+                        this.style.height = newHeight + 'px';
+                        this.style.overflowY = this.scrollHeight > 100 ? 'auto' : 'hidden';
+                    });
+                    chatInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendChat();
+                        }
+                    });
+                }
+            });
+        </script>
+    }
+
+
+
+    <!--By ANGEL-->
+    <!-- Simple dropdown fix -->
+    <script>
+        // Force Bootstrap to reinitialize on every page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Trigger Bootstrap's initialization
+            if (typeof bootstrap !== 'undefined') {
+                // This forces Bootstrap to scan the DOM again
+                document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(element) {
+                    new bootstrap.Dropdown(element);
+                });
+            }
+        });
+
+        // Manual toggle as backup
+        document.addEventListener('click', function(e) {
+            var toggle = e.target.closest('[data-bs-toggle="dropdown"]');
+            if (toggle) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var menu = toggle.nextElementSibling;
+                if (menu && menu.classList.contains('dropdown-menu')) {
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-menu.show').forEach(function(m) {
+                        if (m !== menu) {
+                            m.classList.remove('show');
+                            var t = m.previousElementSibling;
+                            if (t && t.hasAttribute('aria-expanded')) {
+                                t.setAttribute('aria-expanded', 'false');
+                            }
+                        }
+                    });
+
+                    // Toggle current dropdown
+                    menu.classList.toggle('show');
+                    var expanded = toggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
+                    toggle.setAttribute('aria-expanded', expanded);
+                }
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+                    menu.classList.remove('show');
+                    var toggle = menu.previousElementSibling;
+                    if (toggle && toggle.hasAttribute('aria-expanded')) {
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        });
+
+        // Fix By WW
+        // Simple active page highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname.toLowerCase();
+
+            // Get the current controller name from the URL
+            const pathParts = currentPath.split('/').filter(p => p);
+            const currentArea = pathParts.length >= 1 ? pathParts[0] : '';
+            const currentController = pathParts.length >= 2 ? pathParts[1] : '';
+
+            console.log('Current area:', currentArea);
+            console.log('Current controller:', currentController);
+
+            // FIRST: Remove all active classes from all nav links and dropdown items
+            document.querySelectorAll('.navbar-nav .nav-link, .dropdown-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.dropdown').forEach(d => {
+                d.classList.remove('active-dropdown');
+            });
+
+            // For Organization area
+            if (currentArea === 'organization') {
+                // Dashboard link - active on root /organization or /organization/home
+                if (currentPath === '/organization' || currentPath === '/organization/home') {
+                    const dashboardLink = document.querySelector('.navbar-nav .nav-link[href*="/Organization"]');
+                    if (dashboardLink && dashboardLink.getAttribute('href') !== '/Organization/Opportunity') {
+                        dashboardLink.classList.add('active');
+                    }
+                }
+                // Opportunity link - active on any other organization page
+                else {
+                    const opportunityLink = document.querySelector('.navbar-nav .nav-link[href*="/Organization/Opportunity"]');
+                    if (opportunityLink) {
+                        opportunityLink.classList.add('active');
+                    }
+                }
+            }
+
+            // For Volunteer area
+            if (currentArea === 'volunteer') {
+                // Opportunities link
+                if (currentController === 'opportunities') {
+                    const oppLink = document.querySelector('.navbar-nav .nav-link[href*="/Volunteer/Opportunities"]');
+                    if (oppLink) oppLink.classList.add('active');
+                }
+
+                // Application link
+                if (currentController === 'application') {
+                    const appLink = document.querySelector('.navbar-nav .nav-link[href*="/Volunteer/Application"]');
+                    if (appLink) appLink.classList.add('active');
+                }
+
+                // Organization dropdown
+                if (currentController === 'organizations' || currentController === 'followedorgs') {
+                    const orgDropdown = document.querySelector('.nav-item.dropdown > .dropdown-toggle');
+                    if (orgDropdown) orgDropdown.classList.add('active');
+
+                    // Also highlight the specific dropdown item
+                    const dropdownItem = document.querySelector(`.dropdown-item[href*="/Volunteer/${currentController === 'organizations' ? 'Organizations' : 'FollowedOrgs'}"]`);
+                    if (dropdownItem) dropdownItem.classList.add('active');
+                }
+            }
+
+            // For Admin area
+            if (currentArea === 'admin') {
+                // Dashboard
+                if (currentController === 'dashboard') {
+                    const dashLink = document.querySelector('.navbar-nav .nav-link[href*="/Admin/Dashboard"]');
+                    if (dashLink) dashLink.classList.add('active');
+                }
+
+                // Users
+                if (currentController === 'users') {
+                    const usersLink = document.querySelector('.navbar-nav .nav-link[href*="/Admin/Users"]');
+                    if (usersLink) usersLink.classList.add('active');
+                }
+
+                // Reports
+                if (currentController === 'report') {
+                    const reportsLink = document.querySelector('.navbar-nav .nav-link[href*="/Admin/Report"]');
+                    if (reportsLink) reportsLink.classList.add('active');
+                }
+
+                // Organization dropdown (Admin)
+                if (currentController === 'organization') {
+                    const orgDropdown = document.querySelector('.nav-item.dropdown > .dropdown-toggle');
+                    if (orgDropdown) orgDropdown.classList.add('active');
+                }
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+@await Html.PartialAsync("_PrivacyPolicyModal")
+@await Html.PartialAsync("_TermsModal")
+
+<style>
+    .chat-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: #8b92d1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        transition: all 0.3s;
+    }
+
+    .chat-btn:hover {
+        transform: scale(1.05);
+        background: #7a82c5;
+    }
+
+    .chat-btn i {
+        font-size: 28px;
+        color: white;
+    }
+
+    .chat-window {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 350px;
+        height: 500px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        display: none;
+        flex-direction: column;
+        z-index: 1001;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .chat-window.open {
+        display: flex;
+    }
+
+    .chat-header {
+        background: #3f4079;
+        color: white;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        background: #f8fafc;
+    }
+
+    .message {
+        margin-bottom: 12px;
+        display: flex;
+    }
+
+    .message.user {
+        justify-content: flex-end;
+    }
+
+    .message.bot {
+        justify-content: flex-start;
+    }
+
+    .message-content {
+        max-width: 80%;
+        padding: 8px 12px;
+        border-radius: 16px;
+        font-size: 14px;
+    }
+
+    .message.user .message-content {
+        background: #8b92d1;
+        color: white;
+    }
+
+    .message.bot .message-content {
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #2d3e4f;
+    }
+
+    .chat-input {
+        padding: 12px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .chat-input textarea {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        outline: none;
+        font-family: inherit;
+        font-size: 14px;
+        resize: none;
+        overflow-y: hidden;
+        min-height: 36px;
+        max-height: 100px;
+        line-height: 1.4;
+    }
+
+    .chat-input textarea:focus {
+        border-color: #8b92d1;
+        box-shadow: 0 0 0 2px rgba(139,146,209,0.1);
+    }
+
+    .chat-input button {
+        background: #8b92d1;
+        color: white;
+        border: none;
+        border-radius: 24px;
+        padding: 0 16px;
+        cursor: pointer;
+        font-weight: 600;
+        height: 36px;
+        min-width: 60px;
+        white-space: nowrap;
+        flex-shrink: 0; /* Prevent button from shrinking */
+    }
+
+    .chat-input button:hover {
+        background: #7a82c5;
+    }
+
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 8px 12px;
+    }
+
+    .typing-indicator span {
+        width: 8px;
+        height: 8px;
+        background: #8b92d1;
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    @@keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+            opacity: 0.4;
+        }
+
+        30% {
+            transform: translateY(-8px);
+            opacity: 1;
+        }
+    }
+</style>
+
+
+
+

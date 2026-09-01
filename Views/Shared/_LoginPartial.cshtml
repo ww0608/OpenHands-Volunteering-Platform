@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using OpenHandsVolunteerPlatform.Data
+@using System.Security.Claims
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext Context
+
+
+<!--By ANGEL-->
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var organization = Context.Organizations.FirstOrDefault(o => o.UserId == userId);
+        var volunteer = Context.Volunteers.FirstOrDefault(v => v.UserId == userId);
+        var displayName = "Account";
+
+        if (User.IsInRole("Organization") && organization != null)
+        {
+            displayName = organization.OrganizationName;
+        }
+        else if (User.IsInRole("Volunteer") && volunteer != null)
+        {
+            displayName = volunteer.Name;
+        }
+        else
+        {
+            displayName = User.Identity?.Name ?? "Account";
+        }
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle"></i> @displayName
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <!-- Only View Profile link (not Edit) -->
+                @if (User.IsInRole("Organization"))
+                {
+                    <li>
+                        <a class="dropdown-item" asp-area="Organization" asp-controller="Profile" asp-action="Index">
+                            <i class="bi bi-building"></i> View Profile
+                        </a>
+                    </li>
+                }
+                else if (User.IsInRole("Volunteer"))
+                {
+                    <li>
+                        <a class="dropdown-item" asp-area="Volunteer" asp-controller="Profile" asp-action="Index">
+                            <i class="bi bi-person"></i> View Profile
+                        </a>
+                    </li>
+                }
+
+                <p class="dropdown-divide"></p>
+                <li>
+                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                        <i class="bi bi-gear"></i> Account Settings
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/ChangePassword">
+                        <i class="bi bi-key"></i> Change Password
+                    </a>
+                </li>
+                <p class="dropdown-divide"></p>
+                <li>
+                    <form  asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item" style= "color: #dc3545;">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a asp-area="" asp-controller="Home" asp-fragment="join-us" class="btn btn-primary me-3">Register</a>
+        </li>
+        <li class="nav-item">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary me-3">Login</a>
+        </li>
+    }
+</ul>
+
+<style>
+    .dropdown-item {
+        padding: 0.6rem 1.2rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        font-size: 0.95rem !important;
+        cursor: pointer !important;
+    }
+
+    .dropdown-item i {
+        width: 1.2rem !important;
+        color: #8b92d1 !important;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f5f7ff !important;
+    }
+
+    .dropdown-item:hover i {
+        color: #3f4079 !important;
+    }
+
+    .dropdown-divide {
+        margin: 0.25rem 0 !important;
+        border-top: 1px solid #e9ecf3 !important;
+        border-width: thin !important;
+    }
+</style>

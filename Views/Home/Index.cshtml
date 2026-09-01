@@ -1,0 +1,243 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Small Actions · Big Impact</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons (for carousel arrows) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+	<link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+</head>
+
+<body>
+    <!-- HERO SECTION (full width image) -->
+	<section class="hero-image d-flex align-items-center justify-content-end mb-3">
+        <div class="container">
+            <div class="row">
+				<div class="col-md-8 offset-md-4 col-lg-6 offset-lg-6">
+					<div class="hero-overlay-text text-white text-end">
+                        <h1 class="display-5 fw-bold text-primary" style="color: #939dfe !important;">SMALL ACTIONS.<br>BIG IMPACT.</h1>
+                        <p class="lead fs-4 fw-light text-white">Join a growing community of individuals and organizations working towards positive change.</p>
+						<div class="d-flex justify-content-end gap-3 mt-3">
+							<a href="#join-us" class="btn btn-primary btn-sm px-4 rounded-pill shadow" style="background-color: #939dfe !important; border:none;">Get Started</a>
+                            <a href="#about" class="btn btn-outline-light btn-sm px-4 rounded-pill">Learn More</a>
+						</div>
+					</div>
+                </div>
+			</div>
+        </div>
+    </section>
+
+	<section class="py-3" id="about"></section>
+    <!-- ABOUT + CAROUSEL/GALLERY section -->
+	<section class="py-5">
+		<div class="container">
+            <!-- header left aligned -->
+            <h2 class="text-center mb-3 fw-bold" style="color: #676eb2;">About</h2>
+            <!-- wide description -->
+            <p class="text-center lead fs-5 mb-5">Our platform helps individuals discover volunteer opportunities and enables organizations to manage and promote their volunteer programs efficiently.</p>
+
+            <!-- carousel with 4 rounded images and custom arrows -->
+            <div id="aboutCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <!-- first slide: two images (for 4 images we can show 2 per slide using d-none d-md-block) -->
+                    <div class="carousel-item active">
+                        <div class="row g-4">
+                            <div class="col-md-3 col-6">
+                                <img src="~/images/VOL Page 1(4).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <img src="~/images/VOL Page 1(5).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                            <div class="col-md-3 col-6 d-none d-md-block">
+                                <img src="~/images/VOL Page 1(6).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                            <div class="col-md-3 col-6 d-none d-md-block">
+                                <img src="~/images/VOL Page 1(7).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- second slide (duplicate with different cats to simulate gallery) -->
+                    <div class="carousel-item">
+                        <div class="row g-4">
+                            <div class="col-md-3 col-6">
+                                <img src="~/images/VOL Page 1(8).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <img src="~/images/VOL Page 1(9).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                            <div class="col-md-3 col-6 d-none d-md-block">
+                                <img src="~/images/VOL Page 1(10).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                            <div class="col-md-3 col-6 d-none d-md-block">
+                                <img src="~/images/VOL Page 1(11).png" class="carousel-img-rounded" alt="volunteer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- custom round arrow controls (left / right circles) -->
+                <button class="carousel-control-prev"  type="button" data-bs-target="#aboutCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon-custom" style="background-color: #939dfe !important;" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#aboutCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon-custom" style="background-color: #939dfe !important;" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-3" id="features"></section>
+    <section class="py-5 bg-light">
+        <div class="container">
+			<!-- header left aligned -->
+			<h2 class="text-center mb-3 fw-bold" style="color: #676eb2;">Main Features</h2>
+			<!-- wide description -->
+			<p class="text-center lead fs-5 mb-5">Bridging the gap between passion and purpose.</p>            
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                        <i class="bi bi-search fs-1 mb-3 d-block" style="color: #676eb2;"></i>
+                        <h4 class="fw-semibold">Easy Discovery</h4>
+                        <p class="text-muted">Find opportunities that match your specific skills and schedule with our advanced filtering.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                        <i class="bi bi-person-check fs-1 mb-3 d-block" style="color: #676eb2;"></i>
+                        <h4 class="fw-semibold">Direct Connection</h4>
+                        <p class="text-muted">Communicate directly with organizations and build a verified volunteer resume.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                        <i class="bi bi-graph-up-arrow fs-1 mb-3 d-block" style="color: #676eb2;"></i>
+                        <h4 class="fw-semibold">Impact Tracking</h4>
+                        <p class="text-muted">Organizations can track hours and generate impact reports for their stakeholders.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-3" id="join-us"></section>
+    <!-- WHY JOIN US section (two split banners) -->
+	<section class="py-5">
+		<div class="container">
+			<!-- first row: Individual account -->
+			<div class="row mb-4">
+				<h3 class="text-center mb-3 fw-bold" style="color: #676eb2">Ready to Make an Impact?</h3>
+				<p class="text-center lead fs-5 mb-5">Whether you’re an individual or an organization, join today and start creating change.</p>
+				<div class="col-12">
+					<div class="split-banner banner-individual text-white p-5">
+						<div class="banner-inner">
+							<h3 class="mb-3 fw-semibold">Join As Volunteer</h3>
+							<p class="mb-4 w-75 mx-auto">Discover opportunities, gain experience, and make a difference.</p>
+							    @if (!User.Identity.IsAuthenticated)
+                                {
+                                <a asp-area="Identity" asp-page="/Account/RegisterVolunteer" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-semibold">Create individual account</a>
+                                }
+                        </div>
+					</div>
+				</div>
+			</div>
+			<!-- second row: Organization account -->
+			<div class="row">
+				<div class="col-12">
+					<div class="split-banner banner-organization text-white p-5">
+						<div class="banner-inner">
+							<h3 class="mb-3 fw-semibold">Join As Organization</h3>
+							<p class="mb-4 w-75 mx-auto">Manage volunteer programs and connect with passionate individuals.</p>
+							    @if (!User.Identity.IsAuthenticated)
+                                {
+                                    <a asp-area="Identity" asp-page="/Account/RegisterOrganization" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-semibold">Create organization account</a>
+                                }
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+    <footer class="border-top text-white py-3" style="background-color:#676eb2;">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+
+            <!-- Left -->
+            <div class="text-center text-md-start">
+                &copy; 2026 - OpenHandsVolunteerPlatform
+            </div>
+
+            <!-- Right links -->
+            <div class="d-flex align-items-center gap-3">
+
+                <a href="javascript:void(0);"
+                   onclick="openPrivacyModal()"
+                   class="text-white text-decoration-none fw-semibold">
+                    Privacy Policy
+                </a>
+
+                <span class="text-white-50">•</span>
+
+                <a href="javascript:void(0);"
+                   onclick="openTermsModal()"
+                   class="text-white text-decoration-none fw-semibold">
+                    Terms
+                </a>
+
+            </div>
+
+        </div>
+    </footer>
+
+    @* <!-- Bootstrap JS for carousel, navbar collapse etc. -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> *@
+
+</body>
+</html>
+
+<script>
+    //PRIVACY and TERMS
+    function openPrivacyModal() {
+        const modal = document.getElementById('privacyPolicyModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePrivacyModal() {
+        const modal = document.getElementById('privacyPolicyModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    function openTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    // click outside to close
+    document.addEventListener('click', function (e) {
+        const modal = document.getElementById('privacyPolicyModal');
+        if (e.target === modal) {
+            closePrivacyModal();
+        }
+    });
+    document.addEventListener('click', function (e) {
+        const modal = document.getElementById('termsModal');
+        if (e.target === modal) {
+            closeTermsModal();
+        }
+    });
+</script>
